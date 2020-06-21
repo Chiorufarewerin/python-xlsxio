@@ -1,0 +1,3 @@
+include xlsxio/xlsxio_read.pyx
+include xlsxio/cxlsxio_read.pxd
+exclude xlsxio/xlsxio_read.c

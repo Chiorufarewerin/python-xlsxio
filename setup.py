@@ -14,6 +14,9 @@ setup(
     long_description=open(join(dirname(__file__), 'README.md'), encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=['tests']),
+    python_requieres=[
+        '>=3.6',
+    ],
     zip_safe=False,
     keyword=['django', 'auth', 'backend'],
     project_urls={
@@ -24,7 +27,7 @@ setup(
     ],
     ext_modules=cythonize(
         Extension(
-            'xlsxio_read',
+            'xlsxio.xlsxio_read',
             [
                 'xlsxio/xlsxio_read.pyx',
             ],
