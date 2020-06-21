@@ -23,7 +23,7 @@ setup(
         'GitHub': 'https://github.com/Chiorufarewerin/python-xlsxio',
     },
     install_requires=[
-        'Cython~=0.29.0',
+        'Cython',
     ],
     ext_modules=cythonize(
         Extension(

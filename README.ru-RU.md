@@ -8,6 +8,7 @@
 
 * Для ОС базирующихся на Arch linux: `yay xlsxio`
 
+Также необходимо установить Cython: `pip install Cython`
 Затем выполнить: `pip install python-xlsxio`
 
 ## Пример

@@ -131,3 +131,7 @@ dmypy.json
 
 # IDE
 .vscode
+
+*.html
+*.xlsx
+test.py

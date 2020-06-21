@@ -6,7 +6,7 @@ import datetime
 
 from cython cimport sizeof
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport int64_t
+from libc.stdint cimport int64_t, uint64_t
 from libc.time cimport time_t
 
 from xlsxio cimport cxlsxio_read
@@ -41,13 +41,16 @@ def get_xlsxioread_version_string() -> str:
 
 
 cdef class XlsxioReaderSheet:
+    cdef object xlsxioreader
     cdef str encoding
     cdef cxlsxio_read.xlsxioreadersheet _c_xlsxioreadersheet
     cdef int _c_default_type
     cdef int* _c_types
     cdef int _c_types_size
 
-    def __cinit__(self, str encoding):
+    def __cinit__(self, xlsxioreader, str encoding):
+        self.xlsxioreader = xlsxioreader  # define here, cuz xlsxioreader on __delloc__ closes
+
         self.encoding = encoding
         self._c_xlsxioreadersheet = NULL
         self._c_default_type = 0
@@ -147,6 +150,8 @@ cdef class XlsxioReaderSheet:
 
     def read_data(self):
         header = self.read_header()
+        if header is None:
+            return []
         rows = list(self.iter_rows())
         rows.insert(0, header)
         return rows
@@ -164,26 +169,51 @@ cdef class XlsxioReaderSheet:
 
 
 cdef class XlsxioReader:
+    cdef object filename
     cdef cxlsxio_read.xlsxioreader _c_xlsxioreader
 
-    def __cinit__(self, filename: str):
+    cdef init_by_filename(self, str filename):
         cdef bytes filename_bytes = filename.encode('utf-8')
         cdef const char* c_filename = filename_bytes
         self._c_xlsxioreader = cxlsxio_read.xlsxioread_open(c_filename)
         if self._c_xlsxioreader is NULL:
             raise FileNotFoundError('No such file: %s' % (filename,))
 
+    cdef init_by_bytes(self, bytes data_bytes):
+        cdef char* data = data_bytes
+        cdef uint64_t data_len = len(data_bytes)
+        self._c_xlsxioreader = cxlsxio_read.xlsxioread_open_memory(data, data_len, 0)
+        if self._c_xlsxioreader is NULL:
+            raise ValueError('Incorrect value of xlsx file data')
+
+    cdef init_by_file(self, int filehandle):
+        self._c_xlsxioreader = cxlsxio_read.xlsxioread_open_filehandle(filehandle)
+        if self._c_xlsxioreader is NULL:
+            raise ValueError('Incorrect value of xlsx file data')
+
+    def __cinit__(self, filename):
+        self.filename = filename
+
+        if isinstance(filename, str):
+            self.init_by_filename(filename)
+        elif isinstance(filename, bytes):
+            self.init_by_bytes(filename)
+        elif hasattr(filename, 'fileno') and callable(filename.fileno):
+            self.init_by_file(filename.fileno())
+        else:
+            raise TypeError('Incorrect type of xlsx file data ')
+
     def get_sheet(self, sheetname: str = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS,
                   default_type: int = XLSXIOREAD_CELL_STRING, types: Iterable[int] = None,
                   encoding: str = 'utf-8'):
         if self._c_xlsxioreader is NULL:
-            raise RuntimeError('Reader is not open')
+            raise RuntimeError('Reader is closed or not opened')
         if type(flags) is not int:
-            raise TypeError('flags must be an integer')
+            raise TypeError('Value flags must be an integer')
         if flags < 0 or flags > 7:
-            raise ValueError('incorrect flags value')
+            raise ValueError('Incorrect flags value')
 
-        sheet = XlsxioReaderSheet(encoding=encoding)
+        sheet = XlsxioReaderSheet(xlsxioreader=self, encoding=encoding)
 
         if default_type not in XLSXIOREAD_CELL_TYPES:
             raise ValueError('Incorrect default_type value')
@@ -210,7 +240,7 @@ cdef class XlsxioReader:
         sheet._c_xlsxioreadersheet = cxlsxio_read.xlsxioread_sheet_open(self._c_xlsxioreader, c_sheetname, flags)
 
         if sheet._c_xlsxioreadersheet is NULL:
-            raise RuntimeError('Sheet cannot be opened. May incorrect sheetname or xlsx file.')
+            raise RuntimeError('Sheet cannot be opened. May incorrect xlsx file.')
 
         return sheet
 

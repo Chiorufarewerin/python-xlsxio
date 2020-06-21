@@ -8,6 +8,7 @@ Before install python library you need to install c librarry
 
 * For Arch linux bases OS: `yay xlsxio`
 
+You need cython: `pip install Cython`
 And run: `pip install python-xlsxio`
 
 ## Example
