@@ -13,6 +13,13 @@ cdef extern from "xlsxio_read.h":
     xlsxioreader xlsxioread_open_filehandle (int filehandle)
     xlsxioreader xlsxioread_open_memory (void* data, uint64_t datalen, int freedata)
 
+    ctypedef struct xlsxio_read_sheetlist_struct:
+        pass
+    ctypedef xlsxio_read_sheetlist_struct* xlsxioreadersheetlist
+    xlsxioreadersheetlist xlsxioread_sheetlist_open (xlsxioreader handle)
+    void xlsxioread_sheetlist_close (xlsxioreadersheetlist sheetlisthandle)
+    const char* xlsxioread_sheetlist_next (xlsxioreadersheetlist sheetlisthandle)
+
     ctypedef struct xlsxio_read_sheet_struct:
         pass
     ctypedef xlsxio_read_sheet_struct* xlsxioreadersheet
