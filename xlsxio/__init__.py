@@ -1,4 +1,4 @@
-from _xlsxio_read import (  # noqa:F401
+from xlsxio_read import (  # noqa:F401
     # Flags to determine how data is processed
     XLSXIOREAD_SKIP_NONE,
     XLSXIOREAD_SKIP_EMPTY_ROWS,

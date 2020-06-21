@@ -9,7 +9,8 @@ from libc.stdlib cimport malloc, free
 from libc.stdint cimport int64_t
 from libc.time cimport time_t
 
-cimport _cxlsxio_read as cxlsxio_read
+from xlsxio cimport cxlsxio_read
+
 
 # Flags
 XLSXIOREAD_SKIP_NONE = 0
@@ -153,8 +154,10 @@ cdef class XlsxioReaderSheet:
     def close(self):
         if self._c_xlsxioreadersheet is not NULL:
             cxlsxio_read.xlsxioread_sheet_close(self._c_xlsxioreadersheet)
+            self._c_xlsxioreadersheet = NULL
         if self._c_types is not NULL:
             free(self._c_types)
+            self._c_types = NULL
 
     def __dealloc__(self):
         self.close()
@@ -183,12 +186,12 @@ cdef class XlsxioReader:
         sheet = XlsxioReaderSheet(encoding=encoding)
 
         if default_type not in XLSXIOREAD_CELL_TYPES:
-            raise ValueError('incorrect default_type value')
+            raise ValueError('Incorrect default_type value')
         sheet._c_default_type = default_type
 
         if types is not None:
             if not all(_type in XLSXIOREAD_CELL_TYPES for _type in types):
-                raise ValueError('incorrect types value')
+                raise ValueError('Incorrect types value')
             sheet._c_types = <int *> malloc(len(types) * sizeof(int))
             sheet._c_types_size = len(types)
             if sheet._c_types is NULL:
@@ -214,6 +217,7 @@ cdef class XlsxioReader:
     def close(self):
         if self._c_xlsxioreader is not NULL:
             cxlsxio_read.xlsxioread_close(self._c_xlsxioreader)
+            self._c_xlsxioreader = NULL
 
     def __dealloc__(self):
         self.close()
