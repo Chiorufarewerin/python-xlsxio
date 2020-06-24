@@ -6,14 +6,8 @@ from .xlsxio_read import (  # noqa:F401
     XLSXIOREAD_SKIP_ALL_EMPTY,
     XLSXIOREAD_SKIP_EXTRA_CELLS,
 
-    # Flags to determine how values is processed
-    XLSXIOREAD_CELL_BYTES,
-    XLSXIOREAD_CELL_STRING,
-    XLSXIOREAD_CELL_INT,
-    XLSXIOREAD_CELL_FLOAT,
-    XLSXIOREAD_CELL_DATETIME,
-
     get_xlsxioread_version_string,
+    XlsxioReaderSheetList,
     XlsxioReaderSheet,
     XlsxioReader,
 )

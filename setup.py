@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 
 setup(
     name='python-xlsxio',
-    version='0.0.2',
+    version='0.0.3',
     license='MIT',
     url='https://github.com/Chiorufarewerin/python-xlsxio',
     author='Artur Beltsov',
@@ -14,11 +14,13 @@ setup(
     long_description=open(join(dirname(__file__), 'README.md'), encoding='utf-8').read(),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=['tests']),
-    python_requieres=[
-        '>=3.6',
-    ],
+    python_requires='>=3.6',
     zip_safe=False,
-    keyword=['django', 'auth', 'backend'],
+    keywords=[
+        'xlsxio',
+        'python',
+        'c',
+    ],
     project_urls={
         'GitHub': 'https://github.com/Chiorufarewerin/python-xlsxio',
     },
