@@ -25,6 +25,7 @@ cdef int XLSXIOREAD_CELL_STRING = 1
 cdef int XLSXIOREAD_CELL_INT = 2
 cdef int XLSXIOREAD_CELL_FLOAT = 3
 cdef int XLSXIOREAD_CELL_DATETIME = 4
+cdef int XLSXIOREAD_CELL_BOOL = 5
 
 cdef dict XLSXIOREAD_CELL_TYPES = {
     bytes: XLSXIOREAD_CELL_BYTES,
@@ -32,6 +33,7 @@ cdef dict XLSXIOREAD_CELL_TYPES = {
     int: XLSXIOREAD_CELL_INT,
     float: XLSXIOREAD_CELL_FLOAT,
     datetime.datetime: XLSXIOREAD_CELL_DATETIME,
+    bool: XLSXIOREAD_CELL_BOOL,
 }
 
 
@@ -252,6 +254,12 @@ cdef class XlsxioReaderSheet:
             return None
         return datetime.datetime.fromtimestamp(value)
 
+    cdef object read_cell_bool(self):
+        cdef object value = self.read_cell_int()
+        if value is None:
+            return None
+        return bool(value)
+
     cdef object read_cell(self, int _type):
         if _type == XLSXIOREAD_CELL_BYTES:
             return self.read_cell_bytes()
@@ -263,6 +271,8 @@ cdef class XlsxioReaderSheet:
             return self.read_cell_float()
         if _type == XLSXIOREAD_CELL_DATETIME:
             return self.read_cell_datetime()
+        if _type == XLSXIOREAD_CELL_BOOL:
+            return self.read_cell_bool()
         raise ValueError('Incorrect type value')
 
     cdef list _read_row(self, int ignore_type = 0):
