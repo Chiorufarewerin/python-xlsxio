@@ -5,7 +5,7 @@ from Cython.Build import cythonize
 
 setup(
     name='python-xlsxio',
-    version='0.0.3',
+    version='0.0.4',
     license='MIT',
     url='https://github.com/Chiorufarewerin/python-xlsxio',
     author='Artur Beltsov',
@@ -30,10 +30,16 @@ setup(
     ext_modules=cythonize(
         Extension(
             'xlsxio.xlsxio_read',
-            [
+            sources=[
                 'xlsxio/xlsxio_read.pyx',
+                'libc/xlsxio-0.2.26/lib/xlsxio_read.c',
+                'libc/xlsxio-0.2.26/lib/xlsxio_read_sharedstrings.c',
             ],
-            libraries=['xlsxio_read'],
+            include_dirs=[
+                'libc/xlsxio-0.2.26/include',
+                '/usr/local/include',
+                '/usr/include',
+            ],
         ),
     ),
 )

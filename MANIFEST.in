@@ -1,3 +1,11 @@
-include xlsxio/xlsxio_read.pyx
-include xlsxio/cxlsxio_read.pxd
-exclude xlsxio/xlsxio_read.c
+include README.md
+include setup.py
+
+include xlsxio/*.pyx
+include xlsxio/*.pxd
+exclude xlsxio/*.c
+
+include deps/xlsxio-0.2.26/lib/*.c
+include deps/xlsxio-0.2.26/lib/*.h
+include deps/xlsxio-0.2.26/include/*.h
+

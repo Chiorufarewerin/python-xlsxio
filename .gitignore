@@ -5,7 +5,6 @@ __pycache__/
 
 # C extensions
 *.so
-*.c
 
 # Distribution / packaging
 .Python
@@ -15,8 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -134,4 +131,7 @@ dmypy.json
 
 *.html
 *.xlsx
-test.py
+/*.py
+!/setup.py
+xlsxio/*.c
+benchmark/*
