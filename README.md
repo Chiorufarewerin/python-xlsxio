@@ -4,9 +4,15 @@ Wrapper for c library [xlsxio](https://github.com/brechtsanders/xlsxio)
 
 ## Install
 
-You need cython: `pip install Cython`
+### You need install some additional libraries:
 
-And run: `pip install python-xlsxio`
+* For debian: apt-get install expat libzip-dev
+
+* For arch: pacman -S expat libzip
+
+### You need cython: `pip install Cython`
+
+### And run: `pip install python-xlsxio`
 
 ## Example
 
