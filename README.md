@@ -4,7 +4,6 @@ Wrapper for c library [xlsxio](https://github.com/brechtsanders/xlsxio)
 
 ## Install
 
-
 You need cython: `pip install Cython`
 
 And run: `pip install python-xlsxio`
