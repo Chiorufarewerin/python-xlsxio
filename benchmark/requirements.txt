@@ -1,0 +1,6 @@
+Cython==0.29.20
+python-xlsxio==0.0.4
+openpyxl==3.0.3
+xlrd==1.2.0
+sxl==0.0.1a8
+xlsx2csv==0.7.7

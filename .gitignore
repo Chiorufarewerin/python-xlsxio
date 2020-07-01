@@ -131,7 +131,7 @@ dmypy.json
 
 *.html
 *.xlsx
+!benchmark/*.xlsx
 /*.py
 !/setup.py
 xlsxio/*.c
-benchmark/*
