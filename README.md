@@ -82,3 +82,85 @@ with xlsxio.XlsxioReader('file.xlsx') as reader:
 
 print(data)
 ```
+
+Full example for reading xlsx file in sheet `hello`, and not reading at all in memory (write only rows, which have True in 5 column):
+```
+import xlsxio
+import datetime
+
+types = [str, str, float, int, bool, datetime.datetime]
+with xlsxio.XlsxioReader('file.xlsx') as reader:
+    with reader.get_sheet('hello', types=types) as sheet:
+        header = sheet.read_header()
+        only_active = []
+        for row in sheet.iter_rows():
+            if row[4]:
+                only_active.append(row)
+print(only_active)
+```
+
+## Usage read xlsx
+
+### XlsxioReader
+Object of xlsx
+
+#### def \_\_init\_\_(self, filename, encoding: str = 'utf-8')
+Inittializating XlsxioReader
+* filename - str (path to filename), bytes (loaded in memory file) or file like object (not BytesIO)
+* encoding - encoding of xlsx file
+
+#### def get_sheet_names(self) -> tuple
+Return tuple of sheet names in xlsx file
+
+#### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS,types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
+Return XlsxioReaderSheet object
+* sheetname - name of sheet (if None, returns first sheet)
+* flags - possible flags, default is XLSXIOREAD_SKIP_EMPTY_ROWS:
+  * XLSXIOREAD_SKIP_NONE
+  * XLSXIOREAD_SKIP_EMPTY_ROWS
+  * XLSXIOREAD_SKIP_EMPTY_CELLS
+  * XLSXIOREAD_SKIP_ALL_EMPTY
+  * XLSXIOREAD_SKIP_EXTRA_CELLS
+* types - list of types by columns. example, if first column is integer, second - str, end third - float, you can pass: `types=[int, str, float]`. if fourth column will be, then will it default_type.
+Possible types:
+  * bytes
+  * str
+  * int
+  * float
+  * datetime.datetime
+  * bool
+* default_type - default type of columns if types not passed, default str
+
+#### def close(self)
+Closes reader
+
+
+### XlsxioReaderSheet
+Object of sheet
+
+#### def \_\_init\_\_(self,xlsxioreader: XlsxioReader, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str)
+Initializet XlsxioReaderSheet object (it object initializes in xlsxioreader.get_sheet and about params you can read there)
+
+### def read_row(self, ignore_type: bool = False) -> Optional[list]
+Reading next row in list. If rows does not exists return None
+* ignore_type - if this true, return row in default_type (convenient for heading)
+
+### def read_header(self) -> Optional[list]
+Alias for read_row(True)
+
+### def iter_rows(self) -> Iterable[list]
+Iterate rows while rows exists
+
+### def read_data(self) -> List[list]
+Read all sheet rows, and first row in default_type. Method code:
+```
+header = self.read_header()
+if header is None:
+    return []
+rows = list(self.iter_rows())
+rows.insert(0, header)
+return rows
+```
+
+### def close(self)
+Closes sheet

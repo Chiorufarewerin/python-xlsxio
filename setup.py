@@ -4,7 +4,7 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 
-VERSION = '0.0.4'
+VERSION = '0.0.5'
 
 EXTENSIONS = cythonize(
     Extension(
@@ -34,7 +34,7 @@ setup(
     description='Wrapper xlsxio library for python',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
-    packages=find_packages(exclude=['tests']),
+    packages=find_packages(exclude=['tests', 'benchmark']),
     python_requires='>=3.6',
     zip_safe=False,
     keywords=[
