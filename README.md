@@ -164,3 +164,10 @@ return rows
 
 #### def close(self)
 Closes sheet
+
+## Run tests
+
+To run tests use tox
+```
+$ tox
+```
