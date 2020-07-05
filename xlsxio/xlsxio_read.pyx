@@ -113,7 +113,7 @@ cdef class XlsxioReader:
 cdef class XlsxioReaderSheetList:
     cdef XlsxioReader xlsxioreader
     cdef cxlsxio_read.xlsxioreadersheetlist _c_xlsxioreadersheetlist
-    
+
     def __cinit__(self, XlsxioReader xlsxioreader):
         self.xlsxioreader = xlsxioreader
         self._c_xlsxioreadersheetlist = NULL
@@ -143,7 +143,7 @@ cdef class XlsxioReaderSheetList:
         if self._c_xlsxioreadersheetlist is not NULL:
             cxlsxio_read.xlsxioread_sheetlist_close(self._c_xlsxioreadersheetlist)
             self._c_xlsxioreadersheetlist = NULL
-    
+
     def __enter__(self):
         return self
 
@@ -293,7 +293,7 @@ cdef class XlsxioReaderSheet:
                 return row_data
             row_data.append(value)
             n += 1
-    
+
     def read_row(self, ignore_type: bool = False):
         return self._read_row(int(ignore_type))
 
