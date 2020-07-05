@@ -4,7 +4,7 @@ from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 
 
-VERSION = '0.0.5'
+VERSION = '0.1.0'
 
 EXTENSIONS = cythonize(
     Extension(
