@@ -76,9 +76,9 @@ Or simply:
 
 ```
 import xlsxio
-with xlsxio.XlsxioReader('file.xlsx') as reader: 
-    with reader.get_sheet() as sheet: 
-        data = sheet.read_data() 
+with xlsxio.XlsxioReader('file.xlsx') as reader:
+    with reader.get_sheet() as sheet:
+        data = sheet.read_data()
 
 print(data)
 ```
@@ -112,7 +112,7 @@ Inittializating XlsxioReader
 #### def get_sheet_names(self) -> tuple
 Return tuple of sheet names in xlsx file
 
-#### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS,types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
+#### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
 Return XlsxioReaderSheet object
 * sheetname - name of sheet (if None, returns first sheet)
 * flags - possible flags, default is XLSXIOREAD_SKIP_EMPTY_ROWS:
@@ -138,20 +138,20 @@ Closes reader
 ### XlsxioReaderSheet
 Object of sheet
 
-#### def \_\_init\_\_(self,xlsxioreader: XlsxioReader, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str)
+#### def \_\_init\_\_(self, xlsxioreader: XlsxioReader, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str)
 Initializet XlsxioReaderSheet object (it object initializes in xlsxioreader.get_sheet and about params you can read there)
 
-### def read_row(self, ignore_type: bool = False) -> Optional[list]
+#### def read_row(self, ignore_type: bool = False) -> Optional[list]
 Reading next row in list. If rows does not exists return None
 * ignore_type - if this true, return row in default_type (convenient for heading)
 
-### def read_header(self) -> Optional[list]
+#### def read_header(self) -> Optional[list]
 Alias for read_row(True)
 
-### def iter_rows(self) -> Iterable[list]
+#### def iter_rows(self) -> Iterable[list]
 Iterate rows while rows exists
 
-### def read_data(self) -> List[list]
+#### def read_data(self) -> List[list]
 Read all sheet rows, and first row in default_type. Method code:
 ```
 header = self.read_header()
@@ -162,5 +162,5 @@ rows.insert(0, header)
 return rows
 ```
 
-### def close(self)
+#### def close(self)
 Closes sheet
