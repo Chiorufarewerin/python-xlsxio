@@ -115,12 +115,12 @@ Return tuple of sheet names in xlsx file
 #### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
 Return XlsxioReaderSheet object
 * sheetname - name of sheet (if None, returns first sheet)
-* flags - possible flags, default is XLSXIOREAD_SKIP_EMPTY_ROWS:
-  * XLSXIOREAD_SKIP_NONE
-  * XLSXIOREAD_SKIP_EMPTY_ROWS
-  * XLSXIOREAD_SKIP_EMPTY_CELLS
-  * XLSXIOREAD_SKIP_ALL_EMPTY
-  * XLSXIOREAD_SKIP_EXTRA_CELLS
+* flags - default is XlsxioReadFlag.SKIP_NONE ([Read more about flags](https://github.com/brechtsanders/xlsxio/blob/master/include/xlsxio_read.h#L151-L161)). **NOTE**: May not working for files created in LibreOffice ([issue](https://github.com/brechtsanders/xlsxio/issues/74)). All possible flags:
+  * XlsxioReadFlag.SKIP_NONE
+  * XlsxioReadFlag.SKIP_EMPTY_ROWS
+  * XlsxioReadFlag.SKIP_EMPTY_CELLS
+  * XlsxioReadFlag.SKIP_ALL_EMPTY
+  * XlsxioReadFlag.SKIP_EXTRA_CELLS
 * types - list of types by columns. example, if first column is integer, second - str, end third - float, you can pass: `types=[int, str, float]`. if fourth column will be, then will it default_type.
 Possible types:
   * bytes

@@ -1,7 +1,5 @@
 # cython: language_level=3
 
-from typing import Iterable, Optional
-
 import datetime
 
 from cython cimport sizeof
@@ -12,12 +10,13 @@ from libc.time cimport time_t
 from xlsxio cimport cxlsxio_read
 
 
-# Flags
-XLSXIOREAD_SKIP_NONE = 0
-XLSXIOREAD_SKIP_EMPTY_ROWS = 1
-XLSXIOREAD_SKIP_EMPTY_CELLS = 2
-XLSXIOREAD_SKIP_ALL_EMPTY = XLSXIOREAD_SKIP_EMPTY_ROWS | XLSXIOREAD_SKIP_EMPTY_CELLS
-XLSXIOREAD_SKIP_EXTRA_CELLS = 4
+cdef class XlsxioReadFlag:
+    SKIP_NONE = 0
+    SKIP_EMPTY_ROWS = 1
+    SKIP_EMPTY_CELLS = 2
+    SKIP_ALL_EMPTY = SKIP_EMPTY_ROWS | SKIP_EMPTY_CELLS
+    SKIP_EXTRA_CELLS = 4
+
 
 # Type casts
 cdef int XLSXIOREAD_CELL_BYTES = 0
@@ -91,8 +90,8 @@ cdef class XlsxioReader:
             self._cached_sheet_names = sheet_names
         return self._cached_sheet_names
 
-    def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS,
-                  types: Optional[Iterable[type]] = None, default_type: type = str):
+    def get_sheet(self, sheetname = None, int flags = XlsxioReadFlag.SKIP_NONE,
+                  types = None, type default_type = str):
         return XlsxioReaderSheet(self, sheetname, flags, types, default_type)
 
     cpdef close(self):
@@ -165,8 +164,8 @@ cdef class XlsxioReaderSheet:
     cdef int _c_flags
     cdef cxlsxio_read.xlsxioreadersheet _c_xlsxioreadersheet
 
-    def __cinit__(self, XlsxioReader xlsxioreader, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS,
-                  types: Optional[Iterable[type]] = None, default_type: type = str):
+    def __cinit__(self, XlsxioReader xlsxioreader, sheetname = None, int flags = XlsxioReadFlag.SKIP_NONE,
+                  types = None, type default_type = str):
         if type(flags) is not int:
             raise TypeError('Value flags must be an integer')
         if flags < 0 or flags > 7:
@@ -175,6 +174,8 @@ cdef class XlsxioReaderSheet:
             raise ValueError('Incorrect default_type value')
         if sheetname is not None and not isinstance(sheetname, str):
             raise TypeError('Value sheetname must be str or None')
+        if types is not None:
+            types = tuple(types)
 
         self.xlsxioreader = xlsxioreader
         self.sheetname = sheetname
