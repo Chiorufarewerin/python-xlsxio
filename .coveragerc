@@ -1,5 +1,7 @@
 [run]
+plugins = Cython.Coverage
 omit =
     */site-packages/*
     */distutils/*
-    tests/*
+    */tests/*.py
+    test_*.py

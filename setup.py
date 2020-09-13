@@ -1,6 +1,17 @@
 import os
 from glob import glob
 from setuptools import setup, Extension
+from setuptools.command.develop import develop as DevelopCommandOriginal
+
+
+IS_DEVELOPMENT = False
+
+
+class DevelopCommand(DevelopCommandOriginal):
+    def initialize_options(self):
+        global IS_DEVELOPMENT
+        IS_DEVELOPMENT = True
+        super().initialize_options()
 
 
 class lazy_cythonize(list):
@@ -41,10 +52,31 @@ def get_version() -> str:
     raise ValueError('Version string not found')
 
 
+def get_compiler_derectives() -> dict:
+    if IS_DEVELOPMENT:
+        return {
+            'profile': True,
+            'linetrace': True,
+        }
+    return {}
+
+
+def get_extra_extension_kwargs() -> dict:
+    if IS_DEVELOPMENT:
+        return {
+            'extra_compile_args': ['-g'],
+            'define_macros': [
+                ('CYTHON_TRACE', '1'),
+                ('CYTHON_TRACE_NOGIL', '1'),
+            ],
+        }
+    return {}
+
+
 def get_extensions():
     from Cython.Build import cythonize
-    xlsxio_path = './deps/xlsxio'
 
+    xlsxio_path = './deps/xlsxio'
     return cythonize(
         Extension(
             'xlsxio._xlsxio',
@@ -56,7 +88,11 @@ def get_extensions():
                 'expat',
                 'zip',
             ],
+            **get_extra_extension_kwargs(),
+
         ),
+        compiler_directives=get_compiler_derectives(),
+        force=True,
     )
 
 
@@ -76,9 +112,14 @@ setup(
     python_requires='>=3.6',
     setup_requires=[
         'cython>=0.29.0',
+        'pytest-runner',
     ],
     install_requires=[
         'cython>=0.29.0',
+    ],
+    tests_require=[
+        'pytest',
+        'pytest-cov',
     ],
     zip_safe=False,
     keywords=[
@@ -88,8 +129,12 @@ setup(
         'excel',
         'read',
     ],
+    test_suite="tests",
     project_urls={
         'GitHub': 'https://github.com/Chiorufarewerin/python-xlsxio',
     },
     ext_modules=lazy_cythonize(get_extensions),
+    cmdclass={
+        'develop': DevelopCommand,
+    },
 )
