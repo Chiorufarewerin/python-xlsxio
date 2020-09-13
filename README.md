@@ -115,7 +115,7 @@ Return tuple of sheet names in xlsx file
 #### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
 Return XlsxioReaderSheet object
 * sheetname - name of sheet (if None, returns first sheet)
-* flags - default is XlsxioReadFlag.SKIP_NONE ([Read more about flags](https://github.com/brechtsanders/xlsxio/blob/master/include/xlsxio_read.h#L151-L161)). **NOTE**: May not working for files created in LibreOffice ([issue](https://github.com/brechtsanders/xlsxio/issues/74)). All possible flags:
+* flags - default is XlsxioReadFlag.SKIP_NONE ([Read more about flags](https://github.com/brechtsanders/xlsxio/blob/master/include/xlsxio_read.h#L151-L161)). All possible flags:
   * XlsxioReadFlag.SKIP_NONE
   * XlsxioReadFlag.SKIP_EMPTY_ROWS
   * XlsxioReadFlag.SKIP_EMPTY_CELLS

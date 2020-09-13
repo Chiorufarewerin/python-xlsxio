@@ -1,49 +1,95 @@
-from os.path import dirname, join
+import os
 from glob import glob
-from setuptools import setup, find_packages, Extension
-from Cython.Build import cythonize
+from setuptools import setup, Extension
 
 
-VERSION = '0.1.0'
+class lazy_cythonize(list):
+    def __init__(self, callback):
+        self._list, self.callback = None, callback
 
-EXTENSIONS = cythonize(
-    Extension(
-        'xlsxio._xlsxio',
-        sources=glob('./xlsxio/*.pyx') + glob('./deps/xlsxio-0.2.26/lib/*.c'),
-        include_dirs=[
-            './deps/xlsxio-0.2.26/include',
-        ],
-        libraries=[
-            'expat',
-            'zip',
-        ],
-    ),
-)
+    def c_list(self):
+        if self._list is None:
+            self._list = self.callback()
+        return self._list
 
-with open(join(dirname(__file__), 'README.md'), encoding='utf-8') as f:
-    LONG_DESCRIPTION = f.read()
+    def __iter__(self):
+        for e in self.c_list():
+            yield e
+
+    def __getitem__(self, ii):
+        return self.c_list()[ii]
+
+    def __len__(self):
+        return len(self.c_list())
+
+
+def get_file_data(*paths) -> str:
+    file_path = os.path.join(os.path.dirname(__name__), *paths)
+    with open(file_path, encoding='utf-8') as f:
+        return f.read()
+
+
+def get_long_description() -> str:
+    return get_file_data('README.md')
+
+
+def get_version() -> str:
+    data = get_file_data('xlsxio', '__init__.py')
+    for row in data.split('\n'):
+        if row.startswith("__version__ = '"):
+            return row[15:].strip().strip("'")
+    raise ValueError('Version string not found')
+
+
+def get_extensions():
+    from Cython.Build import cythonize
+    xlsxio_path = './deps/xlsxio'
+
+    return cythonize(
+        Extension(
+            'xlsxio._xlsxio',
+            sources=glob('./xlsxio/*.pyx') + glob(f'{xlsxio_path}/lib/*.c'),
+            include_dirs=[
+                f'{xlsxio_path}/include',
+            ],
+            libraries=[
+                'expat',
+                'zip',
+            ],
+        ),
+    )
 
 
 setup(
     name='python-xlsxio',
-    version=VERSION,
+    version=get_version(),
     license='MIT',
     url='https://github.com/Chiorufarewerin/python-xlsxio',
     author='Artur Beltsov',
     author_email='artur1998g@gmail.com',
     description='Wrapper xlsxio library for python',
-    long_description=LONG_DESCRIPTION,
+    long_description=get_long_description(),
     long_description_content_type='text/markdown',
-    packages=find_packages(exclude=['tests', 'benchmark']),
+    packages=[
+        'xlsxio',
+    ],
     python_requires='>=3.6',
+    setup_requires=[
+        'cython>=0.29.0',
+    ],
+    install_requires=[
+        'cython>=0.29.0',
+    ],
     zip_safe=False,
     keywords=[
         'xlsxio',
         'python',
         'c',
+        'excel',
+        'read',
     ],
     project_urls={
         'GitHub': 'https://github.com/Chiorufarewerin/python-xlsxio',
     },
-    ext_modules=EXTENSIONS,
+    ext_modules=lazy_cythonize(get_extensions),
 )

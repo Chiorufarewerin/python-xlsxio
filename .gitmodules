@@ -1,0 +1,3 @@
+[submodule "deps/xlsxio"]
+	path = deps/xlsxio
+	url = https://github.com/brechtsanders/xlsxio.git

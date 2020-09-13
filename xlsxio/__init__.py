@@ -6,4 +6,11 @@ from ._xlsxio import (  # noqa:F401
     XlsxioReader,
 )
 
-del _xlsxio  # noqa:F821
+__version__ = '0.1.1'
+__all__ = (
+    'get_xlsxioread_version_string',
+    'XlsxioReadFlag',
+    'XlsxioReaderSheetList',
+    'XlsxioReaderSheet',
+    'XlsxioReader',
+)

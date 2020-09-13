@@ -5,5 +5,5 @@ global-exclude xlsxio/*.c
 global-include xlsxio/*.pyx
 global-include xlsxio/*.pxd
 
-global-include deps/xlsxio-0.2.26/lib/*.[ch]
-global-include deps/xlsxio-0.2.26/include/*.h
+global-include deps/xlsxio/lib/*.[ch]
+global-include deps/xlsxio/include/*.h
