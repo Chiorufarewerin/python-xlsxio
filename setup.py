@@ -1,17 +1,7 @@
 import os
+import sys
 from glob import glob
 from setuptools import setup, Extension
-from setuptools.command.develop import develop as DevelopCommandOriginal
-
-
-IS_DEVELOPMENT = False
-
-
-class DevelopCommand(DevelopCommandOriginal):
-    def initialize_options(self):
-        global IS_DEVELOPMENT
-        IS_DEVELOPMENT = True
-        super().initialize_options()
 
 
 class lazy_cythonize(list):
@@ -52,46 +42,55 @@ def get_version() -> str:
     raise ValueError('Version string not found')
 
 
-def get_compiler_derectives() -> dict:
-    if IS_DEVELOPMENT:
-        return {
-            'profile': True,
-            'linetrace': True,
-        }
-    return {}
-
-
-def get_extra_extension_kwargs() -> dict:
-    if IS_DEVELOPMENT:
-        return {
-            'extra_compile_args': ['-g'],
-            'define_macros': [
-                ('CYTHON_TRACE', '1'),
-                ('CYTHON_TRACE_NOGIL', '1'),
-            ],
-        }
-    return {}
-
-
 def get_extensions():
     from Cython.Build import cythonize
 
-    xlsxio_path = './deps/xlsxio'
+    is_debug = '--debug' in sys.argv
+    compiler_directives = {
+        'profile': is_debug,
+        'linetrace': is_debug,
+    }
+    define_macros = [
+        ('USE_MINIZIP', '1'),
+        ('NOCRYPT', '1'),
+        ('NOUNCRYPT', '1'),
+    ]
+    if is_debug:
+        define_macros.append(('CYTHON_TRACE', '1'))
+        define_macros.append(('CYTHON_TRACE_NOGIL', '1'))
+
+    if sys.platform.startswith('linux'):
+        define_macros.append(('HAVE_GETRANDOM', '1'))
+    if sys.platform.startswith('darwin'):
+        define_macros.append(('HAVE_ARC4RANDOM_BUF', '1'))
+
+    sources = glob('xlsxio/*.pyx')
+    sources += glob('deps/xlsxio/lib/*.c')
+    sources += glob('deps/expat/expat/lib/*.c')
+    sources += glob('deps/zlib/*.c')
+    sources += glob('deps/zlib/contrib/minizip/*.c')
+
+    sources.remove('deps/zlib/contrib/minizip/minizip.c')
+
+    if not sys.platform.startswith('win32') and not sys.platform.startswith('cygwin'):
+        sources.remove('deps/zlib/contrib/minizip/iowin32.c')
+
+    include_dirs = [
+        '.',
+        'deps/xlsxio/include',
+        'deps/expat/expat/lib',
+        'deps/zlib',
+        'deps/zlib/contrib',
+    ]
+
     return cythonize(
         Extension(
-            'xlsxio._xlsxio',
-            sources=glob('./xlsxio/*.pyx') + glob(f'{xlsxio_path}/lib/*.c'),
-            include_dirs=[
-                f'{xlsxio_path}/include',
-            ],
-            libraries=[
-                'expat',
-                'zip',
-            ],
-            **get_extra_extension_kwargs(),
-
+            name='xlsxio._xlsxio',
+            sources=sources,
+            include_dirs=include_dirs,
+            define_macros=define_macros,
         ),
-        compiler_directives=get_compiler_derectives(),
+        compiler_directives=compiler_directives,
         force=True,
     )
 
@@ -111,11 +110,9 @@ setup(
     ],
     python_requires='>=3.6',
     setup_requires=[
-        'cython>=0.29.0',
+        'cython',
         'pytest-runner',
-    ],
-    install_requires=[
-        'cython>=0.29.0',
+        'wheel',
     ],
     tests_require=[
         'pytest',
@@ -134,7 +131,9 @@ setup(
         'GitHub': 'https://github.com/Chiorufarewerin/python-xlsxio',
     },
     ext_modules=lazy_cythonize(get_extensions),
-    cmdclass={
-        'develop': DevelopCommand,
+    package_data={
+        'xlsxio': [
+            '__init__.pyi',
+        ],
     },
 )

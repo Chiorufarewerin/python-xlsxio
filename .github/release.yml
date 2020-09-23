@@ -1,0 +1,75 @@
+name: workflow
+
+on:
+  push:
+    branches:
+      - feature/build-all
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.8]
+        architecture: [x86, x64]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Update submodules
+      run: git submodule update --init --recursive
+
+    - name: Download Build Tools for Visual Studio 2019
+      run: Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile vs_buildtools.exe
+
+    - name: Run vs_buildtools.exe install
+      run: >-
+        ./vs_buildtools.exe --quiet --wait --norestart --nocache
+        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+        --add Microsoft.VisualStudio.Component.VC.v141.x86.x64
+        --add Microsoft.VisualStudio.Component.VC.140
+        --includeRecommended
+
+    - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+        architecture: ${{ matrix.architecture }}
+
+    - name: Install Python package dependencies
+      run: pip install cython wheel
+
+    - name: Build binary wheel
+      run: python setup.py bdist_wheel
+
+    - name: Archive dist artifacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
+        path: dist
+
+  test-windows:
+    runs-on: windows-latest
+    needs:
+      - build-windows
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.8 x64
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.8'
+          architecture: x64
+
+      - name: install lib
+        uses: actions/download-artifact@v1
+        with:
+          name: dist-windows-3.8-x64
+
+      - working-directory: dist-windows-3.8-x64
+        run: pip install python_xlsxio-0.1.1-cp38-cp38-win_amd64.whl
+
+      - name: test
+        working-directory: dist-windows-3.8-x64
+        run: python -c "import xlsxio; print(xlsxio.get_xlsxioread_version_string())"

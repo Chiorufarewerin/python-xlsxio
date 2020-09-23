@@ -1,3 +1,9 @@
 [submodule "deps/xlsxio"]
 	path = deps/xlsxio
 	url = https://github.com/brechtsanders/xlsxio.git
+[submodule "deps/expat"]
+	path = deps/expat
+	url = https://github.com/libexpat/libexpat.git
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = https://github.com/madler/zlib.git
