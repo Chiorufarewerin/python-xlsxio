@@ -60,7 +60,7 @@ def get_extensions():
         define_macros.append(('CYTHON_TRACE_NOGIL', '1'))
 
     if sys.platform.startswith('linux'):
-        define_macros.append(('HAVE_GETRANDOM', '1'))
+        define_macros.append(('HAVE_SYSCALL_GETRANDOM', '1'))
     if sys.platform.startswith('darwin'):
         define_macros.append(('HAVE_ARC4RANDOM_BUF', '1'))
 
