@@ -21,12 +21,12 @@ jobs:
       - name: Install Python package dependencies
         run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python -m pip install cython wheel
         env:
-          PY_VER: ${{python-version}}
+          PY_VER: ${{ matrix.python-version }}
 
       - name: Build binary wheel
         run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python setup.py bdist_wheel
         env:
-          PY_VER: ${{python-version}}
+          PY_VER: ${{ matrix.python-version }}
 
       - name: Apply auditwheel
         run: auditwheel repair -w dist dist/*
@@ -37,5 +37,5 @@ jobs:
       - name: Archive dist artifacts
         uses: actions/upload-artifact@v1
         with:
-          name: dist-linux-${{ python-version }}
+          name: dist-linux-${{ matrix.python-version }}
           path: dist
