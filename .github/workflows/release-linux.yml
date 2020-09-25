@@ -1,0 +1,37 @@
+name: release-linux
+
+on:
+  push:
+    branches:
+        - feature/build-all
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/pypa/manylinux2014_x86_64
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Install Python package dependencies
+        run: /opt/python/cp${{ python-version }}-cp${{ python-version}}m/bin/python -m pip install cython wheel
+
+      - name: Build binary wheel
+        run: /opt/python/cp${{ python-version }}-cp${{ python-version }}m/bin/python setup.py bdist_wheel
+
+      - name: Apply auditwheel
+        run: auditwheel repair -w dist dist/*
+
+      - name: Remove linux wheel
+        run: rm dist/*-linux_x86_64.whl
+
+      - name: Archive dist artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist-linux-${{ python-version }}
+          path: dist
