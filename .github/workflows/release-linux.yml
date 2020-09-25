@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: Update submodules
+        run: git submodule update --init --recursive
+
       - name: Install Python package dependencies
         run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install cython wheel
 
