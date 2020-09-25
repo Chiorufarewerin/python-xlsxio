@@ -19,14 +19,10 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Install Python package dependencies
-        run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python -m pip install cython wheel
-        env:
-          PY_VER: ${{ matrix.python-version }}
+        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}}m/bin/python -m pip install cython wheel
 
       - name: Build binary wheel
-        run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python setup.py bdist_wheel
-        env:
-          PY_VER: ${{ matrix.python-version }}
+        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}m/bin/python setup.py bdist_wheel
 
       - name: Apply auditwheel
         run: auditwheel repair -w dist dist/*
