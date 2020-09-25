@@ -18,11 +18,14 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: set PY_VER
+        run: export PY_VER=${{ python-version }}
+
       - name: Install Python package dependencies
-        run: /opt/python/cp${{ python-version }}-cp${{ python-version}}m/bin/python -m pip install cython wheel
+        run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python -m pip install cython wheel
 
       - name: Build binary wheel
-        run: /opt/python/cp${{ python-version }}-cp${{ python-version }}m/bin/python setup.py bdist_wheel
+        run: /opt/python/cp${PY_VER}-cp${PY_VER}m/bin/python setup.py bdist_wheel
 
       - name: Apply auditwheel
         run: auditwheel repair -w dist dist/*
