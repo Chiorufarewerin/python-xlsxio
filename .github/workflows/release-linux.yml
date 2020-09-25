@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Install Python package dependencies
-        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}}m/bin/python -m pip install cython wheel
+        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}m/bin/python -m pip install cython wheel
 
       - name: Build binary wheel
         run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}m/bin/python setup.py bdist_wheel
