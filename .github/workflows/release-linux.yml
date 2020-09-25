@@ -14,16 +14,16 @@ jobs:
       max-parallel: 3
       matrix:
         python-version:
-          - '38'
+          - cp38-cp38
 
     steps:
       - uses: actions/checkout@master
 
       - name: Install Python package dependencies
-        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}m/bin/python -m pip install cython wheel
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install cython wheel
 
       - name: Build binary wheel
-        run: /opt/python/cp${{ matrix.python-version }}-cp${{ matrix.python-version }}m/bin/python setup.py bdist_wheel
+        run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
 
       - name: Apply auditwheel
         run: auditwheel repair -w dist dist/*
