@@ -53,7 +53,7 @@ jobs:
       #   run: Remove-Item xlsxio -Recurse -Force
 
       - name: Debug
-        run: python setup.py build_ext --inplace --debug
+        run: python setup.py build_ext --inplace
 
       - name: Run tests
         run: python -m pytest

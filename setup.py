@@ -45,7 +45,7 @@ def get_version() -> str:
 def get_extensions():
     from Cython.Build import cythonize
 
-    is_debug = '--debug' in sys.argv
+    is_debug = '--debug' in sys.argv or True
     compiler_directives = {
         'profile': is_debug,
         'linetrace': is_debug,
