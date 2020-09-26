@@ -44,7 +44,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Install package
-        run: pip install dist\\*
+        run: pip install dist\*
 
       - name: Remove xlsxio
         run: rd -r xlsxio
