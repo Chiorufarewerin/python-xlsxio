@@ -1,0 +1,47 @@
+name: release-mac
+
+on:
+  push:
+    branches:
+        - feature/build-all
+
+jobs:
+  build-linux:
+    runs-on: macos-latest
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version: [3.8]
+
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Update submodules
+        run: git submodule update --init --recursive
+
+      - name: Set up Python ${{ matrix.python-version }} x64
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: x64
+
+      - name: Install Python package dependencies
+        run: pip install -r requirements.txt
+
+      - name: Build binary wheel
+        run: python setup.py bdist_wheel
+
+      - name: Install package
+        run: pip install dist/*
+
+      - name: Remove xlsxio
+        run: rm -rf xlsxio
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Archive dist artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist-macos-${{ matrix.python-version }}
+          path: dist

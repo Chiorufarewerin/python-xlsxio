@@ -49,27 +49,45 @@ jobs:
         name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
         path: dist
 
-  test-windows:
-    runs-on: windows-latest
-    needs:
-      - build-windows
+  build-linux:
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/pypa/manylinux2014_x86_64
+    strategy:
+      max-parallel: 3
+      matrix:
+        python-version:
+          - cp38-cp38
+
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
 
-      - name: Set up Python 3.8 x64
-        uses: actions/setup-python@v1
+      - name: Update submodules
+        run: git submodule update --init --recursive
+
+      - name: Install Python package dependencies
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install -r requirements.txt
+
+      - name: Build binary wheel
+        run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
+
+      - name: Apply auditwheel
+        run: auditwheel repair -w dist dist/*
+
+      - name: Remove linux wheel
+        run: rm dist/*-linux_x86_64.whl
+
+      - name: Install package
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install dist/*
+
+      - name: Remove xlsxio
+        run: rm -rf xlsxio
+
+      - name: Run tests
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pytest
+
+      - name: Archive dist artifacts
+        uses: actions/upload-artifact@v1
         with:
-          python-version: '3.8'
-          architecture: x64
-
-      - name: install lib
-        uses: actions/download-artifact@v1
-        with:
-          name: dist-windows-3.8-x64
-
-      - working-directory: dist-windows-3.8-x64
-        run: pip install python_xlsxio-0.1.1-cp38-cp38-win_amd64.whl
-
-      - name: test
-        working-directory: dist-windows-3.8-x64
-        run: python -c "import xlsxio; print(xlsxio.get_xlsxioread_version_string())"
+          name: dist-linux-${{ matrix.python-version }}
+          path: dist
