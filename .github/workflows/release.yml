@@ -43,14 +43,14 @@ jobs:
       - name: Build binary wheel
         run: python setup.py bdist_wheel
 
-      - name: Install package
-        run: python -c "import glob, pip;pip.main(['install'] + glob.glob('dist/*.whl'))"
+      # - name: Install package
+      #   run: python -c "import glob, pip;pip.main(['install'] + glob.glob('dist/*.whl'))"
 
-      - name: Remove xlsxio
-        run: rd -r xlsxio
+      # - name: Remove xlsxio
+      #   run: rd -r xlsxio
 
-      - name: Run tests
-        run: python -m pytest
+      # - name: Run tests
+      #   run: python -m pytest
 
       - name: Archive dist artifacts
         uses: actions/upload-artifact@v1
