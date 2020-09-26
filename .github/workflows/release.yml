@@ -143,9 +143,9 @@ jobs:
 
   upload:
     needs:
-      - build-windows
+      # - build-windows
       - build-linux
-      - build-mac
+      # - build-mac
     runs-on: ubuntu-latest
 
     steps:
