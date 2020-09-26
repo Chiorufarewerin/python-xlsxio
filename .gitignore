@@ -130,7 +130,7 @@ dmypy.json
 .vscode
 
 *.html
-*.xlsx
+*.xlsx*
 !benchmark/*.xlsx
 !tests/xlsx/*.xlsx
 /*.py
