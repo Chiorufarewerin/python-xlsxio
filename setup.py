@@ -111,15 +111,6 @@ setup(
         'xlsxio',
     ],
     python_requires='>=3.6',
-    setup_requires=[
-        'cython',
-        'pytest-runner',
-        'wheel',
-    ],
-    tests_require=[
-        'pytest',
-        'pytest-cov',
-    ],
     zip_safe=False,
     keywords=[
         'xlsxio',

@@ -23,7 +23,7 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: Install Python package dependencies
-        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install cython wheel
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip -r requirements.txt
 
       - name: Build binary wheel
         run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
@@ -33,6 +33,15 @@ jobs:
 
       - name: Remove linux wheel
         run: rm dist/*-linux_x86_64.whl
+
+      - name: Install package
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install dist/*
+
+      - name: Remove xlsxio
+        run: rm -rf xlsxio
+
+      - name: Run tests
+        run: pytest
 
       - name: Archive dist artifacts
         uses: actions/upload-artifact@v1
