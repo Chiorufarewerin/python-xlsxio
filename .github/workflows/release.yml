@@ -44,7 +44,7 @@ jobs:
         run: python setup.py bdist_wheel
 
       - name: Install package
-        run: cmd.exe /c for %x in (dist *.whl) do pip install %x
+        run: python -c "import glob, pip;pip.main(['install'] + glob.glob('dist/*.whl'))"
 
       - name: Remove xlsxio
         run: rd -r xlsxio
