@@ -12,6 +12,7 @@ XLSX_TEST_FILE_BASE = os.path.join(XLSX_DIR, 'test_file_base.xlsx')
 
 
 class TestReadXlsx(TestCase):
+    maxDiff = None
     reader: XlsxioReader
 
     def setUp(self):
