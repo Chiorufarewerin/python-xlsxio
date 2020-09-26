@@ -41,7 +41,7 @@ jobs:
         run: rm -rf xlsxio
 
       - name: Run tests
-        run: pytest
+        run: /opt/python/${{ matrix.python-version }}/bin/python -m pytest
 
       - name: Archive dist artifacts
         uses: actions/upload-artifact@v1
