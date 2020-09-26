@@ -171,7 +171,7 @@ jobs:
           path: dist
 
       - name: Move artifacts to dist
-        run: for dir in dist/*; do [ -d "$dir" ] && mv "$dir"/* dist/ && rm "$dir"; done
+        run: for dir in dist/*; do [ -d "$dir" ] && mv "$dir"/* dist/ && rm -r "$dir"; done
 
       - name: Upload with twine
         env:
