@@ -43,7 +43,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build binary wheel
-        run: python setup.py bdist_wheel
+        run: python setup.py bdist_wheel --debug
 
       - name: Install package
         working-directory: dist
