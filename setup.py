@@ -43,7 +43,15 @@ def get_version() -> str:
 
 
 def get_extensions():
-    from Cython.Build import cythonize
+    try:
+        from Cython.Build import cythonize
+
+        sources = glob('xlsxio/*.pyx')
+    except ImportError:
+        def cythonize(*args, **__):
+            return args
+
+        sources = glob('xlsxio/*.c')
 
     is_debug = '--debug' in sys.argv or True
     compiler_directives = {
@@ -64,7 +72,6 @@ def get_extensions():
     if sys.platform.startswith('darwin'):
         define_macros.append(('HAVE_ARC4RANDOM_BUF', '1'))
 
-    sources = glob('xlsxio/*.pyx')
     sources += glob('deps/xlsxio/lib/*.c')
     sources += glob('deps/expat/expat/lib/*.c')
     sources += glob('deps/zlib/*.c')

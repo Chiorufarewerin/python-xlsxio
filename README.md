@@ -10,15 +10,11 @@ Of the minuses, you should know in advance the data types of each column, or rea
 
 ## Install
 
-You need install some additional libraries:
+Just: `pip install python-xlsxio`
 
-* For **Debian**: `apt-get install expat libzip-dev`
+If you want sped up about 5% you can build from source:
 
-* For **Arch**: `pacman -S expat libzip`
-
-You need cython: `pip install Cython`
-
-And run: `pip install python-xlsxio`
+`pip install python-xlsxio --no-binary python-xlsxio`
 
 ## Benchmarks read xlsx
 
