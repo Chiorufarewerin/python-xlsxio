@@ -253,7 +253,10 @@ cdef class XlsxioReaderSheet:
         cdef int result = cxlsxio_read.xlsxioread_sheet_next_cell_datetime(self._c_xlsxioreadersheet, &value)
         if result != 1:
             return None
-        return datetime.datetime.fromtimestamp(value)
+        IF UNAME_SYSNAME == "Windows":
+            return datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=value)
+        ELSE:
+            return datetime.datetime.utcfromtimestamp(value)
 
     cdef object read_cell_bool(self):
         cdef object value = self.read_cell_int()

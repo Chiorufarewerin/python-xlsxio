@@ -130,10 +130,11 @@ dmypy.json
 .vscode
 
 *.html
-*.xlsx
+*.xlsx*
 !benchmark/*.xlsx
 !tests/xlsx/*.xlsx
 /*.py
 !/setup.py
 xlsxio/*.c
 /*.txt
+!/requirements.txt
