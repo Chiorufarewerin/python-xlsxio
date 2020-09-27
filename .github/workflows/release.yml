@@ -11,7 +11,10 @@ jobs:
     strategy:
       max-parallel: 6
       matrix:
-        python-version: [3.8]
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
         architecture:
           - x86
           - x64
@@ -69,6 +72,8 @@ jobs:
       max-parallel: 3
       matrix:
         python-version:
+          - cp36-cp36m
+          - cp37-cp37m
           - cp38-cp38
 
     steps:
@@ -109,7 +114,10 @@ jobs:
     strategy:
       max-parallel: 3
       matrix:
-        python-version: [3.8]
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
 
     steps:
       - uses: actions/checkout@master
