@@ -12,9 +12,9 @@ Of the minuses, you should know in advance the data types of each column, or rea
 
 Just: `pip install python-xlsxio`
 
-If you want sped up about 5% you can build from source:
+If you want speed up about 5% you can build from source:
 
-`pip install python-xlsxio --no-binary python-xlsxio`
+`pip install cython python-xlsxio --no-binary python-xlsxio`
 
 ## Benchmarks read xlsx
 
