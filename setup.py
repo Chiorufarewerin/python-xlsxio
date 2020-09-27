@@ -70,7 +70,7 @@ def get_extensions():
     sources += glob('deps/zlib/*.c')
     sources += glob('deps/zlib/contrib/minizip/*.c')
 
-    for source in sources:
+    for source in list(sources):
         if source.endswith('minizip.c'):
             sources.remove(source)
         if source.endswith('iowin32.c') and \
