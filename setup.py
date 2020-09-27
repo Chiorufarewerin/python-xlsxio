@@ -73,9 +73,9 @@ def get_extensions():
     for source in sources:
         if source.endswith('minizip.c'):
             sources.remove(source)
-
-    if not sys.platform.startswith('win32') and not sys.platform.startswith('cygwin'):
-        sources.remove('deps/zlib/contrib/minizip/iowin32.c')
+        if source.endswith('iowin32.c') and \
+           not sys.platform.startswith('win32') and not sys.platform.startswith('cygwin'):
+            sources.remove(source)
 
     include_dirs = [
         '.',

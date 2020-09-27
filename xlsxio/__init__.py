@@ -6,7 +6,7 @@ from ._xlsxio import (  # noqa:F401
     XlsxioReader,
 )
 
-__version__ = '0.1.2.dev1'
+__version__ = '0.1.2.dev2'
 __all__ = (
     'get_xlsxioread_version_string',
     'XlsxioReadFlag',
