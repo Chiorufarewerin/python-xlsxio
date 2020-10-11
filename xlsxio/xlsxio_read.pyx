@@ -78,19 +78,16 @@ cdef class XlsxioReader:
         elif hasattr(filename, 'fileno') and callable(filename.fileno):
             self.init_by_file(filename.fileno())
         else:
-            raise TypeError('Incorrect type of xlsx file data')
+            raise TypeError(f'Expected string, bytes or file object, not "{type(filename).__name__}"')
 
     cpdef tuple get_sheet_names(self):
         if self._cached_sheet_names is None:
-            if self._c_xlsxioreader is NULL:
-                raise RuntimeError('Reader is closed or not opened')
-            sheetlist = XlsxioReaderSheetList(self)
-            sheet_names = sheetlist.get_names()
-            sheetlist.close()
+            with XlsxioReaderSheetList(self) as sheetlist:
+                sheet_names = sheetlist.get_names()
             self._cached_sheet_names = sheet_names
         return self._cached_sheet_names
 
-    def get_sheet(self, sheetname = None, int flags = XlsxioReadFlag.SKIP_NONE,
+    def get_sheet(self, sheetname = None, int flags = XlsxioReadFlag.SKIP_EMPTY_ROWS,
                   types = None, type default_type = str):
         return XlsxioReaderSheet(self, sheetname, flags, types, default_type)
 
@@ -99,13 +96,13 @@ cdef class XlsxioReader:
             cxlsxio_read.xlsxioread_close(self._c_xlsxioreader)
             self._c_xlsxioreader = NULL
 
-    def __dealloc__(self):
-        self.close()
-
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def __dealloc__(self):
         self.close()
 
 
@@ -114,6 +111,8 @@ cdef class XlsxioReaderSheetList:
     cdef cxlsxio_read.xlsxioreadersheetlist _c_xlsxioreadersheetlist
 
     def __cinit__(self, XlsxioReader xlsxioreader):
+        if xlsxioreader._c_xlsxioreader is NULL:
+            raise RuntimeError('Reader is closed or not opened')
         self.xlsxioreader = xlsxioreader
         self._c_xlsxioreadersheetlist = NULL
         self._c_xlsxioreadersheetlist = cxlsxio_read.xlsxioread_sheetlist_open(self.xlsxioreader._c_xlsxioreader)
@@ -128,7 +127,7 @@ cdef class XlsxioReaderSheetList:
 
     cpdef tuple get_names(self):
         if self._c_xlsxioreadersheetlist is NULL:
-            raise IOError('Sheet list is not opened')
+            raise RuntimeError('Sheet list is not opened')
 
         cdef list names = []
         cdef object name
@@ -164,10 +163,8 @@ cdef class XlsxioReaderSheet:
     cdef int _c_flags
     cdef cxlsxio_read.xlsxioreadersheet _c_xlsxioreadersheet
 
-    def __cinit__(self, XlsxioReader xlsxioreader, sheetname = None, int flags = XlsxioReadFlag.SKIP_NONE,
+    def __cinit__(self, XlsxioReader xlsxioreader, sheetname = None, int flags = XlsxioReadFlag.SKIP_EMPTY_ROWS,
                   types = None, type default_type = str):
-        if type(flags) is not int:
-            raise TypeError('Value flags must be an integer')
         if flags < 0 or flags > 7:
             raise ValueError('Incorrect flags value')
         if default_type not in XLSXIOREAD_CELL_TYPES:
@@ -195,7 +192,8 @@ cdef class XlsxioReaderSheet:
             temp_filename = sheetname.encode(xlsxioreader.encoding)
             self._c_sheetname = temp_filename
 
-        self._c_xlsxioreadersheet = cxlsxio_read.xlsxioread_sheet_open(xlsxioreader._c_xlsxioreader, self._c_sheetname, self._c_flags)
+        self._c_xlsxioreadersheet = cxlsxio_read.xlsxioread_sheet_open(xlsxioreader._c_xlsxioreader,
+                                                                       self._c_sheetname, self._c_flags)
         if self._c_xlsxioreadersheet is NULL:
             raise RuntimeError('Sheet cannot be opened.')
 

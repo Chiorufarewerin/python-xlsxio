@@ -1,109 +1,118 @@
 import os
+import pytest
+import xlsxio
 import datetime
-from unittest import TestCase
-from tests.test_read_data import TEST_READ_DATA_TYPES, TEST_READ_DATA_WITHOUT_TYPES, TEST_READ_DATA_BYTES
-
-from xlsxio import XlsxioReader, XlsxioReadFlag
+from . import test_read_data
 
 
 TYPES = (int, str, str, datetime.datetime, int, float, datetime.datetime, bool)
-XLSX_DIR = os.path.join(os.path.dirname(os.path.abspath(__name__)), 'tests', 'xlsx')
-XLSX_TEST_FILE_BASE = os.path.join(XLSX_DIR, 'test_file_base.xlsx')
+MAIN_DIR = os.path.dirname(os.path.abspath(__name__))
+CURRENT_DIR = os.path.join(MAIN_DIR, 'tests')
+XLSX_DIR = os.path.join(CURRENT_DIR, 'xlsx')
+XLSX_TEST_FILE_PATH = os.path.join(XLSX_DIR, 'test_file_base.xlsx')
 
 
-class TestReadXlsx(TestCase):
-    maxDiff = None
-    reader: XlsxioReader
+def test_get_xlsxioread_version_string():
+    assert xlsxio.get_xlsxioread_version_string() == '0.2.30'
 
-    def setUp(self):
-        self.reader = XlsxioReader(XLSX_TEST_FILE_BASE)
 
-    def tearDown(self):
-        self.reader.close()
+class TestReadXlsx:
+    def get_reader(self) -> xlsxio.XlsxioReader:
+        return xlsxio.XlsxioReader(XLSX_TEST_FILE_PATH)
 
-    def test_sheet_names(self):
-        self.assertEqual(self.reader.get_sheet_names(), ('Sheet1', 'Привет', 'test_empty'))
+    def base_read(self, reader: xlsxio.XlsxioReader):
+        for sheet_name in reader.get_sheet_names():
+            with reader.get_sheet(sheet_name) as sheet:
+                assert sheet_name in test_read_data.TEST_READ_DATA_STRINGS
+                assert sheet.read_data() == test_read_data.TEST_READ_DATA_STRINGS[sheet_name]
+            with reader.get_sheet(sheet_name, default_type=bytes) as sheet:
+                assert sheet_name in test_read_data.TEST_READ_DATA_BYTES
+                assert sheet.read_data() == test_read_data.TEST_READ_DATA_BYTES[sheet_name]
+            with reader.get_sheet(sheet_name, types=TYPES) as sheet:
+                assert sheet_name in test_read_data.TEST_READ_DATA_TYPES
+                assert sheet.read_data() == test_read_data.TEST_READ_DATA_TYPES[sheet_name]
 
-    def test_first_sheet_data_without_types(self):
-        with self.reader.get_sheet() as sheet:
-            data = sheet.read_data()
+    def test_read_from_filename(self):
+        reader = xlsxio.XlsxioReader(XLSX_TEST_FILE_PATH)
+        self.base_read(reader)
 
-        self.assertEqual(len(data), 100)
-        self.assertListEqual(data, TEST_READ_DATA_WITHOUT_TYPES['Sheet1'])
+    def test_read_from_bytes(self):
+        with open(XLSX_TEST_FILE_PATH, 'rb') as f:
+            reader = xlsxio.XlsxioReader(f.read())
+        self.base_read(reader)
 
-    def test_data_without_types(self):
-        for sheet_name in self.reader.get_sheet_names()[:-1]:
-            with self.reader.get_sheet(sheet_name) as sheet:
-                data = sheet.read_data()
-            self.assertListEqual(data, TEST_READ_DATA_WITHOUT_TYPES[sheet_name])
+    def test_read_from_file(self):
+        f = open(XLSX_TEST_FILE_PATH, 'rb')
+        reader = xlsxio.XlsxioReader(f)
+        self.base_read(reader)
+        f.close()
 
-    def test_data_types(self):
-        for sheet_name in self.reader.get_sheet_names()[:-1]:
-            with self.reader.get_sheet(sheet_name, types=TYPES) as sheet:
-                data = sheet.read_data()
-            self.assertListEqual(data, TEST_READ_DATA_TYPES[sheet_name])
+    def test_read_from_filename_not_existing(self):
+        with pytest.raises(FileNotFoundError) as ex:
+            xlsxio.XlsxioReader('notfound.xlsx')
+        assert str(ex.value) == 'No such file: notfound.xlsx'
 
-    def test_data_bytes(self):
-        for sheet_name in self.reader.get_sheet_names()[:-1]:
-            with self.reader.get_sheet(sheet_name, default_type=bytes) as sheet:
-                data = sheet.read_data()
-            self.assertListEqual(data, TEST_READ_DATA_BYTES[sheet_name])
+    def test_read_from_incorrect_bytes(self):
+        with pytest.raises(ValueError) as ex:
+            xlsxio.XlsxioReader(b'')
+        assert str(ex.value) == 'Incorrect value of xlsx file data'
 
-    def test_read_header(self):
-        with self.reader.get_sheet(types=TYPES) as sheet:
-            row = sheet.read_row(True)
-        with self.reader.get_sheet(types=TYPES) as sheet:
-            header = sheet.read_header()
-        self.assertListEqual(row, header)
+    def test_read_from_incorrect_file(self):
+        filename = os.path.join(CURRENT_DIR, '__init__.py')  # just any not xlsx file
+        f = open(filename, 'rb')
+        with pytest.raises(ValueError) as ex:
+            xlsxio.XlsxioReader(f)
+        assert str(ex.value) == 'Incorrect value of xlsx file data'
 
-    def test_iter_first_rows(self):
-        with self.reader.get_sheet(types=TYPES) as sheet:
-            rows = [sheet.read_header()]
-            for i, row in enumerate(sheet.iter_rows()):
-                rows.append(row)
-                if i == 5:
-                    break
-        self.assertListEqual(rows, TEST_READ_DATA_TYPES['Sheet1'][:7])
+    def test_read_from_closed_file(self):
+        f = open(XLSX_TEST_FILE_PATH, 'rb')
+        f.close()
+        with pytest.raises(ValueError) as ex:
+            xlsxio.XlsxioReader(f)
+        assert str(ex.value) == 'I/O operation on closed file'
 
-    # def test_flag_skip_empty_rows(self):
-    #     with self.reader.get_sheet('test_empty', flags=XlsxioReadFlag.SKIP_EMPTY_ROWS) as sheet:
-    #         data = sheet.read_data()
-    #     self.assertEqual(len(data), 5)
-    #     test_data = list(filter(lambda x: any(x), TEST_READ_DATA_WITHOUT_TYPES['test_empty']))
-    #     self.assertListEqual(data, test_data)
+    def test_read_incorrect_type(self):
+        with pytest.raises(TypeError) as ex:
+            xlsxio.XlsxioReader(123)
+        assert str(ex.value) == 'Expected string, bytes or file object, not "int"'
 
-    def test_flag_skip_empty_cells(self):
-        with self.reader.get_sheet('test_empty', flags=XlsxioReadFlag.SKIP_EMPTY_CELLS) as sheet:
-            data = sheet.read_data()
+    def test_get_sheet_names(self):
+        with self.get_reader() as reader:
+            assert reader.get_sheet_names() == ('Sheet1', 'Привет', 'test_empty')
 
-        test_data = TEST_READ_DATA_WITHOUT_TYPES['test_empty']
-        self.assertEqual(len(data), 7)
-        self.assertEqual(len(data[0]), 8)
-        self.assertListEqual(data[0], test_data[0])
-        self.assertEqual(len(data[1]), 3)
-        self.assertListEqual(data[1], list(filter(None, test_data[1])))
-        self.assertEqual(len(data[2]), 5)
-        self.assertListEqual(data[2], list(filter(None, test_data[2])))
-        self.assertListEqual(data[3], [])
-        self.assertEqual(len(data[4]), 1)
-        self.assertEqual(data[4][0], test_data[4][0])
-        self.assertListEqual(data[5], [])
-        self.assertEqual(len(data[6]), 8)
-        self.assertListEqual(data[6], test_data[-1])
+    def test_get_sheet_names_reader_closed(self):
+        with self.get_reader() as reader:
+            pass
+        with pytest.raises(RuntimeError) as ex:
+            reader.get_sheet_names()
+        assert str(ex.value) == 'Reader is closed or not opened'
 
-    def test_flag_skip_all_empty(self):
-        with self.reader.get_sheet('test_empty', flags=XlsxioReadFlag.SKIP_ALL_EMPTY) as sheet:
-            data = sheet.read_data()
+    def test_sheet_incorrect_flags_value(self):
+        with self.get_reader() as reader:
+            with pytest.raises(ValueError) as ex:
+                reader.get_sheet(flags=8)
+        assert str(ex.value) == 'Incorrect flags value'
 
-        test_data = TEST_READ_DATA_WITHOUT_TYPES['test_empty']
-        self.assertEqual(len(data), 5)
-        self.assertEqual(len(data[0]), 8)
-        self.assertListEqual(data[0], test_data[0])
-        self.assertEqual(len(data[1]), 3)
-        self.assertListEqual(data[1], list(filter(None, test_data[1])))
-        self.assertEqual(len(data[2]), 5)
-        self.assertListEqual(data[2], list(filter(None, test_data[2])))
-        self.assertEqual(len(data[3]), 1)
-        self.assertEqual(data[3][0], test_data[4][0])
-        self.assertEqual(len(data[4]), 8)
-        self.assertListEqual(data[4], test_data[-1])
+    def test_sheet_incorrect_default_type_value(self):
+        with self.get_reader() as reader:
+            with pytest.raises(ValueError) as ex:
+                reader.get_sheet(default_type=list)
+        assert str(ex.value) == 'Incorrect default_type value'
+
+    def test_sheet_incorrect_sheetname_value(self):
+        with self.get_reader() as reader:
+            with pytest.raises(TypeError) as ex:
+                reader.get_sheet(123)
+        assert str(ex.value) == 'Value sheetname must be str or None'
+
+    def test_sheet_sheetname_not_found(self):
+        with self.get_reader() as reader:
+            with pytest.raises(ValueError) as ex:
+                reader.get_sheet('test')
+        assert str(ex.value) == 'No such sheet: test'
+
+    def test_sheet_icorrect_types(self):
+        with self.get_reader() as reader:
+            with pytest.raises(ValueError) as ex:
+                reader.get_sheet(types=[type])
+        assert str(ex.value) == 'Incorrect types value'
