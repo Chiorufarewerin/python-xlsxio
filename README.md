@@ -57,7 +57,7 @@ Small file - file with 100 rows
 
 ## Fast start with read xlsx
 
-```
+```python
 import xlsxio
 xlsxio_reader = xlsxio.XlsxioReader('file.xlsx')
 sheet = xlsxio_reader.get_sheet()
@@ -70,7 +70,7 @@ print(data)
 
 Or simply:
 
-```
+```python
 import xlsxio
 with xlsxio.XlsxioReader('file.xlsx') as reader:
     with reader.get_sheet() as sheet:
@@ -80,7 +80,7 @@ print(data)
 ```
 
 Full example for reading xlsx file in sheet `hello`, and not reading at all in memory (write only rows, which have True in 5 column):
-```
+```python
 import xlsxio
 import datetime
 
@@ -108,10 +108,10 @@ Inittializating XlsxioReader
 #### def get_sheet_names(self) -> tuple
 Return tuple of sheet names in xlsx file
 
-#### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
+#### def get_sheet(self, sheetname: Optional[str] = None, flags: int = XlsxioReadFlag.SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str) -> XlsxioReaderSheet
 Return XlsxioReaderSheet object
 * sheetname - name of sheet (if None, returns first sheet)
-* flags - default is XlsxioReadFlag.SKIP_NONE ([Read more about flags](https://github.com/brechtsanders/xlsxio/blob/master/include/xlsxio_read.h#L151-L161)). All possible flags:
+* flags - default is XlsxioReadFlag.SKIP_EMPTY_ROWS ([Read more about flags](https://github.com/brechtsanders/xlsxio/blob/master/include/xlsxio_read.h#L151-L161)). All possible flags:
   * XlsxioReadFlag.SKIP_NONE
   * XlsxioReadFlag.SKIP_EMPTY_ROWS
   * XlsxioReadFlag.SKIP_EMPTY_CELLS
@@ -134,7 +134,7 @@ Closes reader
 ### XlsxioReaderSheet
 Object of sheet
 
-#### def \_\_init\_\_(self, xlsxioreader: XlsxioReader, sheetname: Optional[str] = None, flags: int = XLSXIOREAD_SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str)
+#### def \_\_init\_\_(self, xlsxioreader: XlsxioReader, sheetname: Optional[str] = None, flags: int = XlsxioReadFlag.SKIP_EMPTY_ROWS, types: Optional[Iterable[type]] = None, default_type: type = str)
 Initializet XlsxioReaderSheet object (it object initializes in xlsxioreader.get_sheet and about params you can read there)
 
 #### def read_row(self, ignore_type: bool = False) -> Optional[list]
@@ -149,7 +149,7 @@ Iterate rows while rows exists
 
 #### def read_data(self) -> List[list]
 Read all sheet rows, and first row in default_type. Method code:
-```
+```python
 header = self.read_header()
 if header is None:
     return []
@@ -160,10 +160,3 @@ return rows
 
 #### def close(self)
 Closes sheet
-
-## Run tests
-
-To run tests use tox
-```
-$ tox
-```
