@@ -64,16 +64,16 @@ class XlsxioReaderSheet:
                  types: Optional[Iterable[type, ...]] = None, default_type: type = str):
         ...
 
-    def read_row(self, ignore_type: bool = False) -> Optional[Tuple[Any, ...]]:
+    def read_row(self, ignore_type: bool = False) -> Optional[List[Any, ...]]:
         ...
 
-    def read_header(self) -> Optional[Tuple[Any, ...]]:
+    def read_header(self) -> Optional[List[Any, ...]]:
         ...
 
-    def iter_rows(self) -> Iterator[Tuple[Any, ...]]:
+    def iter_rows(self) -> Iterator[List[Any, ...]]:
         ...
 
-    def read_data(self) -> List[Tuple[Any, ...]]:
+    def read_data(self) -> List[List[Any, ...]]:
         ...
 
     def close(self):
