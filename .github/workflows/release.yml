@@ -46,24 +46,30 @@ jobs:
       - name: Install Python package dependencies
         run: pip install -r requirements.txt
 
-      - name: Build binary wheel
-        run: python setup.py bdist_wheel
+      # - name: Build binary wheel
+      #   run: python setup.py bdist_wheel
 
-      - name: Install package
-        working-directory: dist
-        run: pip install (Get-ChildItem | Select-Object -First 1).Name
+      # - name: Install package
+      #   working-directory: dist
+      #   run: pip install (Get-ChildItem | Select-Object -First 1).Name
 
-      - name: Remove xlsxio
-        run: Remove-Item xlsxio -Recurse -Force
+      # - name: Remove xlsxio
+      #   run: Remove-Item xlsxio -Recurse -Force
+
+      # - name: Run tests
+      #   run: python -m pytest
+
+      # - name: Archive dist artifacts
+      #   uses: actions/upload-artifact@v1
+      #   with:
+      #     name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
+      #     path: dist
+
+      - name: Build debug ext
+        run: python setup.py build_ext --inplace --debug
 
       - name: Run tests
         run: python -m pytest
-
-      - name: Archive dist artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
-          path: dist
 
   build-linux:
     runs-on: ubuntu-latest
