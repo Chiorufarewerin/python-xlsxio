@@ -62,11 +62,6 @@ cdef class XlsxioReader:
         if self._c_xlsxioreader is NULL:
             raise ValueError('Incorrect value of xlsx file data')
 
-    cdef init_by_file(self, int filehandle):
-        self._c_xlsxioreader = cxlsxio_read.xlsxioread_open_filehandle(filehandle)
-        if self._c_xlsxioreader is NULL:
-            raise ValueError('Incorrect value of xlsx file data')
-
     def __cinit__(self, filename, str encoding = 'utf-8'):
         self.filename = filename
         self.encoding = encoding
@@ -75,10 +70,8 @@ cdef class XlsxioReader:
             self.init_by_filename(filename)
         elif isinstance(filename, bytes):
             self.init_by_bytes(filename)
-        elif hasattr(filename, 'fileno') and callable(filename.fileno):
-            self.init_by_file(filename.fileno())
         else:
-            raise TypeError(f'Expected string, bytes or file object, not "{type(filename).__name__}"')
+            raise TypeError(f'Expected string or bytes, not "{type(filename).__name__}"')
 
     cpdef tuple get_sheet_names(self):
         if self._cached_sheet_names is None:

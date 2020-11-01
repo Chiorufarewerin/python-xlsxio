@@ -53,7 +53,7 @@ def get_extensions():
 
         sources = glob('xlsxio/*.c')
 
-    is_debug = '--debug' in sys.argv or True
+    is_debug = '--debug' in sys.argv
     compiler_directives = {
         'profile': is_debug,
         'linetrace': is_debug,
@@ -77,8 +77,17 @@ def get_extensions():
     sources += glob('deps/zlib/*.c')
     sources += glob('deps/zlib/contrib/minizip/*.c')
 
+    ignore_files = [
+        'minizip.c',
+        'miniunz.c',
+        'gzread.c',
+        'gzclose.c',
+        'gzlib.c',
+        'gzwrite.c',
+    ]
+
     for source in list(sources):
-        if source.endswith('minizip.c') or source.endswith('gzread.c') or source.endswith('gzclose.c'):
+        if any(map(source.endswith, ignore_files)):
             sources.remove(source)
         if source.endswith('iowin32.c') and \
            not sys.platform.startswith('win32') and not sys.platform.startswith('cygwin'):
