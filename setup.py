@@ -79,11 +79,11 @@ def get_extensions():
 
     ignore_files = [
         'minizip.c',
+        'miniunz.c',
         'gzread.c',
         'gzclose.c',
         'gzlib.c',
         'gzwrite.c',
-        'miniunz.c',
     ]
 
     for source in list(sources):

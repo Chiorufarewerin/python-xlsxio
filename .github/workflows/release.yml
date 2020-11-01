@@ -6,64 +6,64 @@ on:
       - feature/build-test
 
 jobs:
-  # build-windows:
-  #   runs-on: windows-latest
-  #   strategy:
-  #     max-parallel: 8
-  #     matrix:
-  #       python-version:
-  #         - 3.6
-  #         - 3.7
-  #         - 3.8
-  #         - 3.9
-  #       architecture:
-  #         - x86
-  #         - x64
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 8
+      matrix:
+        python-version:
+          # - 3.6
+          # - 3.7
+          - 3.8
+          # - 3.9
+        architecture:
+          - x86
+          - x64
 
-  #   steps:
-  #     - uses: actions/checkout@v2
+    steps:
+      - uses: actions/checkout@v2
 
-  #     - name: Update submodules
-  #       run: git submodule update --init --recursive
+      - name: Update submodules
+        run: git submodule update --init --recursive
 
-  #     - name: Download Build Tools for Visual Studio 2019
-  #       run: Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile vs_buildtools.exe
+      - name: Download Build Tools for Visual Studio 2019
+        run: Invoke-WebRequest -Uri https://aka.ms/vs/16/release/vs_buildtools.exe -OutFile vs_buildtools.exe
 
-  #     - name: Run vs_buildtools.exe install
-  #       run: >-
-  #         ./vs_buildtools.exe --quiet --wait --norestart --nocache
-  #         --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
-  #         --add Microsoft.VisualStudio.Component.VC.v141.x86.x64
-  #         --add Microsoft.VisualStudio.Component.VC.140
-  #         --includeRecommended
+      - name: Run vs_buildtools.exe install
+        run: >-
+          ./vs_buildtools.exe --quiet --wait --norestart --nocache
+          --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+          --add Microsoft.VisualStudio.Component.VC.v141.x86.x64
+          --add Microsoft.VisualStudio.Component.VC.140
+          --includeRecommended
 
-  #     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
-  #       uses: actions/setup-python@v1
-  #       with:
-  #         python-version: ${{ matrix.python-version }}
-  #         architecture: ${{ matrix.architecture }}
+      - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
 
-  #     - name: Install Python package dependencies
-  #       run: pip install -r requirements.txt
+      - name: Install Python package dependencies
+        run: pip install -r requirements.txt
 
-  #     - name: Build binary wheel
-  #       run: python setup.py bdist_wheel
+      - name: Build binary wheel
+        run: python setup.py bdist_wheel
 
-  #     - name: Install package
-  #       working-directory: dist
-  #       run: pip install (Get-ChildItem | Select-Object -First 1).Name
+      - name: Install package
+        working-directory: dist
+        run: pip install (Get-ChildItem | Select-Object -First 1).Name
 
-  #     - name: Remove xlsxio
-  #       run: Remove-Item xlsxio -Recurse -Force
+      - name: Remove xlsxio
+        run: Remove-Item xlsxio -Recurse -Force
 
-  #     - name: Run tests
-  #       run: python -m pytest
+      - name: Run tests
+        run: python -m pytest
 
-  #     - name: Archive dist artifacts
-  #       uses: actions/upload-artifact@v1
-  #       with:
-  #         name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
-  #         path: dist
+      - name: Archive dist artifacts
+        uses: actions/upload-artifact@v1
+        with:
+          name: dist-windows-${{ matrix.python-version }}-${{ matrix.architecture }}
+          path: dist
 
 
   # build-linux:
@@ -112,49 +112,49 @@ jobs:
   #         name: dist-linux-${{ matrix.python-version }}
   #         path: dist
 
-  build-mac:
-    runs-on: macos-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version:
-          - 3.6
-          - 3.7
-          - 3.8
-          - 3.9
+  # build-mac:
+  #   runs-on: macos-latest
+  #   strategy:
+  #     max-parallel: 4
+  #     matrix:
+  #       python-version:
+  #         - 3.6
+  #         - 3.7
+  #         - 3.8
+  #         - 3.9
 
-    steps:
-      - uses: actions/checkout@master
+  #   steps:
+  #     - uses: actions/checkout@master
 
-      - name: Update submodules
-        run: git submodule update --init --recursive
+  #     - name: Update submodules
+  #       run: git submodule update --init --recursive
 
-      - name: Set up Python ${{ matrix.python-version }} x64
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
-          architecture: x64
+  #     - name: Set up Python ${{ matrix.python-version }} x64
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #         architecture: x64
 
-      - name: Install Python package dependencies
-        run: pip install -r requirements.txt
+  #     - name: Install Python package dependencies
+  #       run: pip install -r requirements.txt
 
-      - name: Build binary wheel
-        run: python setup.py bdist_wheel
+  #     - name: Build binary wheel
+  #       run: python setup.py bdist_wheel
 
-      - name: Install package
-        run: pip install dist/*
+  #     - name: Install package
+  #       run: pip install dist/*
 
-      - name: Remove xlsxio
-        run: rm -rf xlsxio
+  #     - name: Remove xlsxio
+  #       run: rm -rf xlsxio
 
-      - name: Run tests
-        run: python -m pytest
+  #     - name: Run tests
+  #       run: python -m pytest
 
-      - name: Archive dist artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: dist-macos-${{ matrix.python-version }}
-          path: dist
+  #     - name: Archive dist artifacts
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: dist-macos-${{ matrix.python-version }}
+  #         path: dist
 
   # upload:
   #   needs:
