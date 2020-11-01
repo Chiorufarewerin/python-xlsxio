@@ -22,7 +22,7 @@ class XlsxioReader:
 
     def get_sheet(self, sheetname: Optional[str] = None,
                   flags: int = XlsxioReadFlag.SKIP_EMPTY_ROWS,
-                  types: Optional[Iterable[type, ...]] = None, default_type: type = str) -> 'XlsxioReaderSheet':
+                  types: Optional[Iterable[type]] = None, default_type: type = str) -> 'XlsxioReaderSheet':
         ...
 
     def close(self):
@@ -61,19 +61,19 @@ class XlsxioReaderSheetList:
 class XlsxioReaderSheet:
     def __init__(self, xlsxioreader: XlsxioReader, sheetname: Optional[str] = None,
                  flags: int = XlsxioReadFlag.SKIP_EMPTY_ROWS,
-                 types: Optional[Iterable[type, ...]] = None, default_type: type = str):
+                 types: Optional[Iterable[type]] = None, default_type: type = str):
         ...
 
-    def read_row(self, ignore_type: bool = False) -> Optional[List[Any, ...]]:
+    def read_row(self, ignore_type: bool = False) -> Optional[List[Any]]:
         ...
 
-    def read_header(self) -> Optional[List[Any, ...]]:
+    def read_header(self) -> Optional[List[Any]]:
         ...
 
-    def iter_rows(self) -> Iterator[List[Any, ...]]:
+    def iter_rows(self) -> Iterator[List[Any]]:
         ...
 
-    def read_data(self) -> List[List[Any, ...]]:
+    def read_data(self) -> List[List[Any]]:
         ...
 
     def close(self):
