@@ -9,12 +9,13 @@ jobs:
   build-windows:
     runs-on: windows-latest
     strategy:
-      max-parallel: 6
+      max-parallel: 8
       matrix:
         python-version:
           - 3.6
           - 3.7
           - 3.8
+          - 3.9
         architecture:
           - x86
           - x64
@@ -69,12 +70,13 @@ jobs:
     container:
       image: quay.io/pypa/manylinux2014_x86_64
     strategy:
-      max-parallel: 3
+      max-parallel: 4
       matrix:
         python-version:
           - cp36-cp36m
           - cp37-cp37m
           - cp38-cp38
+          - cp39-cp39
 
     steps:
       - uses: actions/checkout@master
@@ -112,12 +114,13 @@ jobs:
   build-mac:
     runs-on: macos-latest
     strategy:
-      max-parallel: 3
+      max-parallel: 4
       matrix:
         python-version:
           - 3.6
           - 3.7
           - 3.8
+          - 3.9
 
     steps:
       - uses: actions/checkout@master
