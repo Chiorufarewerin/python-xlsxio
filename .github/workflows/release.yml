@@ -2,8 +2,8 @@ name: release
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - feature/build-test
 
 jobs:
   build-windows:
@@ -71,51 +71,51 @@ jobs:
       - name: Run tests
         run: python -m pytest
 
-  build-linux:
-    runs-on: ubuntu-latest
-    container:
-      image: quay.io/pypa/manylinux2014_x86_64
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version:
-          - cp36-cp36m
-          - cp37-cp37m
-          - cp38-cp38
-          - cp39-cp39
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: quay.io/pypa/manylinux2014_x86_64
+  #   strategy:
+  #     max-parallel: 4
+  #     matrix:
+  #       python-version:
+  #         - cp36-cp36m
+  #         - cp37-cp37m
+  #         - cp38-cp38
+  #         - cp39-cp39
 
-    steps:
-      - uses: actions/checkout@master
+  #   steps:
+  #     - uses: actions/checkout@master
 
-      - name: Update submodules
-        run: git submodule update --init --recursive
+  #     - name: Update submodules
+  #       run: git submodule update --init --recursive
 
-      - name: Install Python package dependencies
-        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install -r requirements.txt
+  #     - name: Install Python package dependencies
+  #       run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install -r requirements.txt
 
-      - name: Build binary wheel
-        run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
+  #     - name: Build binary wheel
+  #       run: /opt/python/${{ matrix.python-version }}/bin/python setup.py bdist_wheel
 
-      - name: Apply auditwheel
-        run: auditwheel repair -w dist dist/*
+  #     - name: Apply auditwheel
+  #       run: auditwheel repair -w dist dist/*
 
-      - name: Remove linux wheel
-        run: rm dist/*-linux_x86_64.whl
+  #     - name: Remove linux wheel
+  #       run: rm dist/*-linux_x86_64.whl
 
-      - name: Install package
-        run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install dist/*
+  #     - name: Install package
+  #       run: /opt/python/${{ matrix.python-version }}/bin/python -m pip install dist/*
 
-      - name: Remove xlsxio
-        run: rm -rf xlsxio
+  #     - name: Remove xlsxio
+  #       run: rm -rf xlsxio
 
-      - name: Run tests
-        run: /opt/python/${{ matrix.python-version }}/bin/python -m pytest
+  #     - name: Run tests
+  #       run: /opt/python/${{ matrix.python-version }}/bin/python -m pytest
 
-      - name: Archive dist artifacts
-        uses: actions/upload-artifact@v1
-        with:
-          name: dist-linux-${{ matrix.python-version }}
-          path: dist
+  #     - name: Archive dist artifacts
+  #       uses: actions/upload-artifact@v1
+  #       with:
+  #         name: dist-linux-${{ matrix.python-version }}
+  #         path: dist
 
   build-mac:
     runs-on: macos-latest
@@ -164,7 +164,7 @@ jobs:
   upload:
     needs:
       - build-windows
-      - build-linux
+      # - build-linux
       - build-mac
     runs-on: ubuntu-latest
 
