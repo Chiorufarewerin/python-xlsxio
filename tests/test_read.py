@@ -42,12 +42,6 @@ class TestReadXlsx:
             reader = xlsxio.XlsxioReader(f.read())
         self.base_read(reader)
 
-    # def test_read_from_file(self):
-    #     f = open(XLSX_TEST_FILE_PATH, 'rb')
-    #     reader = xlsxio.XlsxioReader(f)
-    #     self.base_read(reader)
-    #     f.close()
-
     def test_read_from_filename_not_existing(self):
         with pytest.raises(FileNotFoundError) as ex:
             xlsxio.XlsxioReader('notfound.xlsx')
@@ -58,24 +52,10 @@ class TestReadXlsx:
             xlsxio.XlsxioReader(b'')
         assert str(ex.value) == 'Incorrect value of xlsx file data'
 
-    def test_read_from_incorrect_file(self):
-        filename = os.path.join(CURRENT_DIR, '__init__.py')  # just any not xlsx file
-        f = open(filename, 'rb')
-        with pytest.raises(ValueError) as ex:
-            xlsxio.XlsxioReader(f)
-        assert str(ex.value) == 'Incorrect value of xlsx file data'
-
-    def test_read_from_closed_file(self):
-        f = open(XLSX_TEST_FILE_PATH, 'rb')
-        f.close()
-        with pytest.raises(ValueError) as ex:
-            xlsxio.XlsxioReader(f)
-        assert str(ex.value) == 'I/O operation on closed file'
-
     def test_read_incorrect_type(self):
         with pytest.raises(TypeError) as ex:
             xlsxio.XlsxioReader(123)
-        assert str(ex.value) == 'Expected string, bytes or file object, not "int"'
+        assert str(ex.value) == 'Expected string or bytes, not "int"'
 
     def test_get_sheet_names(self):
         with self.get_reader() as reader:
