@@ -57,7 +57,7 @@ jobs:
         run: Remove-Item xlsxio -Recurse -Force
 
       - name: Run tests
-        run: python -m pytest
+        run: python -m pytest -s
 
       - name: Archive dist artifacts
         uses: actions/upload-artifact@v1

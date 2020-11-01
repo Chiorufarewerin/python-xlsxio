@@ -42,11 +42,11 @@ class TestReadXlsx:
             reader = xlsxio.XlsxioReader(f.read())
         self.base_read(reader)
 
-    def test_read_from_file(self):
-        f = open(XLSX_TEST_FILE_PATH, 'rb')
-        reader = xlsxio.XlsxioReader(f)
-        self.base_read(reader)
-        f.close()
+    # def test_read_from_file(self):
+    #     f = open(XLSX_TEST_FILE_PATH, 'rb')
+    #     reader = xlsxio.XlsxioReader(f)
+    #     self.base_read(reader)
+    #     f.close()
 
     def test_read_from_filename_not_existing(self):
         with pytest.raises(FileNotFoundError) as ex:
