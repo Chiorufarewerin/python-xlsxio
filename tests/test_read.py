@@ -9,7 +9,8 @@ TYPES = (int, str, str, datetime.datetime, int, float, datetime.datetime, bool)
 MAIN_DIR = os.path.dirname(os.path.abspath(__name__))
 CURRENT_DIR = os.path.join(MAIN_DIR, 'tests')
 XLSX_DIR = os.path.join(CURRENT_DIR, 'xlsx')
-XLSX_TEST_FILE_PATH = os.path.join(XLSX_DIR, 'test_file_base.xlsx')
+XLSX_TEST_FILENAME = 'test_file_base.xlsx'
+XLSX_TEST_FILE_PATH = os.path.join(XLSX_DIR, XLSX_TEST_FILENAME)
 
 
 def test_get_xlsxioread_version_string():
@@ -17,8 +18,8 @@ def test_get_xlsxioread_version_string():
 
 
 class TestReadXlsx:
-    def get_reader(self) -> xlsxio.XlsxioReader:
-        return xlsxio.XlsxioReader(XLSX_TEST_FILE_PATH)
+    def get_reader(self, *, filename: str = XLSX_TEST_FILENAME) -> xlsxio.XlsxioReader:
+        return xlsxio.XlsxioReader(os.path.join(XLSX_DIR, filename))
 
     def base_read(self, reader: xlsxio.XlsxioReader):
         for sheet_name in reader.get_sheet_names():
@@ -116,3 +117,16 @@ class TestReadXlsx:
             with pytest.raises(ValueError) as ex:
                 reader.get_sheet(types=[type])
         assert str(ex.value) == 'Incorrect types value'
+
+    def test_read_sheet_ignore_type(self):
+        with self.get_reader() as reader:
+            with reader.get_sheet('Sheet1', types=TYPES) as sheet:
+                sheet.read_row(True) == test_read_data.TEST_READ_DATA_STRINGS['Sheet1'][0]
+                sheet.read_row(False) == test_read_data.TEST_READ_DATA_TYPES['Sheet1'][1]
+                sheet.read_row(True) == test_read_data.TEST_READ_DATA_STRINGS['Sheet1'][2]
+
+    def test_sheet_empty_read_data(self):
+        with self.get_reader(filename='test_empty.xlsx') as reader:
+            assert reader.get_sheet_names() == ('Sheet', 'empty')
+            with reader.get_sheet('empty') as sheet:
+                assert sheet.read_data() == []
