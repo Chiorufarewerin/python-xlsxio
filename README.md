@@ -117,6 +117,7 @@ Return XlsxioReaderSheet object
   * XlsxioReadFlag.SKIP_EMPTY_CELLS
   * XlsxioReadFlag.SKIP_ALL_EMPTY
   * XlsxioReadFlag.SKIP_EXTRA_CELLS
+  * XlsxioReadFlag.SKIP_HIDDEN_ROWS
 * types - list of types by columns. example, if first column is integer, second - str, end third - float, you can pass: `types=[int, str, float]`. if fourth column will be, then will it default_type.
 Possible types:
   * bytes
@@ -146,6 +147,12 @@ Alias for read_row(True)
 
 #### def iter_rows(self) -> Iterable[list]
 Iterate rows while rows exists
+
+#### def get_last_row_index(self) -> int:
+Getting last row index (returns 0 if not readed yet)
+
+#### def get_flags(self) -> int:
+Getting applied flags
 
 #### def read_data(self) -> List[list]
 Read all sheet rows, and first row in default_type. Method code:

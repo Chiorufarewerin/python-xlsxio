@@ -11,6 +11,7 @@ class XlsxioReadFlag:
     SKIP_EMPTY_CELLS: int
     SKIP_ALL_EMPTY: int
     SKIP_EXTRA_CELLS: int
+    SKIP_HIDDEN_ROWS: int
 
 
 class XlsxioReader:
@@ -62,6 +63,12 @@ class XlsxioReaderSheet:
     def __init__(self, xlsxioreader: XlsxioReader, sheetname: Optional[str] = None,
                  flags: int = XlsxioReadFlag.SKIP_EMPTY_ROWS,
                  types: Optional[Iterable[type]] = None, default_type: type = str):
+        ...
+
+    def get_last_row_index(self) -> int:
+        ...
+
+    def get_flags(self) -> int:
         ...
 
     def read_row(self, ignore_type: bool = False) -> Optional[List[Any]]:

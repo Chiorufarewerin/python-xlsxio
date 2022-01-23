@@ -71,7 +71,7 @@ class TestReadXlsx:
     def test_sheet_incorrect_flags_value(self):
         with self.get_reader() as reader:
             with pytest.raises(ValueError) as ex:
-                reader.get_sheet(flags=8)
+                reader.get_sheet(flags=16)
         assert str(ex.value) == 'Incorrect flags value'
 
     def test_sheet_incorrect_default_type_value(self):
@@ -110,3 +110,31 @@ class TestReadXlsx:
             assert reader.get_sheet_names() == ('Sheet', 'empty')
             with reader.get_sheet('empty') as sheet:
                 assert sheet.read_data() == []
+
+    def test_flags(self):
+        flag_names = [name for name in vars(xlsxio.XlsxioReadFlag).keys() if not name.startswith('__')]
+
+        assert len(flag_names) == 6
+        assert xlsxio.XlsxioReadFlag.SKIP_NONE == 0
+        assert xlsxio.XlsxioReadFlag.SKIP_EMPTY_ROWS == 1
+        assert xlsxio.XlsxioReadFlag.SKIP_EMPTY_CELLS == 2
+        assert xlsxio.XlsxioReadFlag.SKIP_ALL_EMPTY == 3
+        assert xlsxio.XlsxioReadFlag.SKIP_EXTRA_CELLS == 4
+        assert xlsxio.XlsxioReadFlag.SKIP_HIDDEN_ROWS == 8
+
+    def test_get_flags(self):
+        with self.get_reader() as reader:
+            flags = xlsxio.XlsxioReadFlag.SKIP_EXTRA_CELLS | xlsxio.XlsxioReadFlag.SKIP_HIDDEN_ROWS
+            with reader.get_sheet(flags=flags) as sheet:
+                assert not sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_EMPTY_ROWS
+                assert not sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_EMPTY_CELLS
+                assert not sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_ALL_EMPTY
+                assert sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_EXTRA_CELLS
+                assert sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_HIDDEN_ROWS
+
+    def test_get_last_row_index(self):
+        with self.get_reader() as reader:
+            with reader.get_sheet() as sheet:
+                assert sheet.get_last_row_index() == 0
+                sheet.read_row()
+                assert sheet.get_last_row_index() == 1

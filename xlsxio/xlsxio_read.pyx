@@ -3,6 +3,7 @@
 import datetime
 
 from cython cimport sizeof
+from libc.stddef cimport size_t
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport int64_t, uint64_t
 from libc.time cimport time_t
@@ -11,11 +12,12 @@ from xlsxio cimport cxlsxio_read
 
 
 cdef class XlsxioReadFlag:
-    SKIP_NONE = 0
-    SKIP_EMPTY_ROWS = 1
-    SKIP_EMPTY_CELLS = 2
-    SKIP_ALL_EMPTY = SKIP_EMPTY_ROWS | SKIP_EMPTY_CELLS
-    SKIP_EXTRA_CELLS = 4
+    SKIP_NONE = cxlsxio_read.XLSXIOREAD_SKIP_NONE
+    SKIP_EMPTY_ROWS = cxlsxio_read.XLSXIOREAD_SKIP_EMPTY_ROWS
+    SKIP_EMPTY_CELLS = cxlsxio_read.XLSXIOREAD_SKIP_EMPTY_CELLS
+    SKIP_ALL_EMPTY = cxlsxio_read.XLSXIOREAD_SKIP_ALL_EMPTY
+    SKIP_EXTRA_CELLS = cxlsxio_read.XLSXIOREAD_SKIP_EXTRA_CELLS
+    SKIP_HIDDEN_ROWS = cxlsxio_read.XLSXIOREAD_SKIP_HIDDEN_ROWS
 
 
 # Type casts
@@ -158,7 +160,14 @@ cdef class XlsxioReaderSheet:
 
     def __cinit__(self, XlsxioReader xlsxioreader, sheetname = None, int flags = XlsxioReadFlag.SKIP_EMPTY_ROWS,
                   types = None, type default_type = str):
-        if flags < 0 or flags > 7:
+        if flags < XlsxioReadFlag.SKIP_NONE or flags > (
+            XlsxioReadFlag.SKIP_NONE |
+            XlsxioReadFlag.SKIP_EMPTY_ROWS |
+            XlsxioReadFlag.SKIP_EMPTY_CELLS |
+            XlsxioReadFlag.SKIP_ALL_EMPTY |
+            XlsxioReadFlag.SKIP_EXTRA_CELLS |
+            XlsxioReadFlag.SKIP_HIDDEN_ROWS
+        ):
             raise ValueError('Incorrect flags value')
         if default_type not in XLSXIOREAD_CELL_TYPES:
             raise ValueError('Incorrect default_type value')
@@ -200,6 +209,10 @@ cdef class XlsxioReaderSheet:
             for i in range(len(types)):
                 self._c_types[i] = XLSXIOREAD_CELL_TYPES[types[i]]
 
+    cdef _raise_on_sheet_null(self):
+        if self._c_xlsxioreadersheet is NULL:
+            raise RuntimeError('Sheet is not open')
+
     cdef char* read_cell_char(self):
         cdef char* value
         cdef int result = cxlsxio_read.xlsxioread_sheet_next_cell_string(self._c_xlsxioreadersheet, &value)
@@ -214,7 +227,7 @@ cdef class XlsxioReaderSheet:
         try:
             return value_char
         finally:
-            free(value_char)
+            cxlsxio_read.xlsxioread_free(value_char)
 
     cdef object read_cell_string(self):
         cdef char* value_char = self.read_cell_char()
@@ -223,7 +236,7 @@ cdef class XlsxioReaderSheet:
         try:
             return value_char.decode(self.xlsxioreader.encoding)
         finally:
-            free(value_char)
+            cxlsxio_read.xlsxioread_free(value_char)
 
     cdef object read_cell_int(self):
         cdef int64_t value
@@ -271,8 +284,7 @@ cdef class XlsxioReaderSheet:
         raise ValueError('Incorrect type value')
 
     cdef list _read_row(self, int ignore_type = 0):
-        if self._c_xlsxioreadersheet is NULL:
-            raise RuntimeError('Sheet is not open')
+        self._raise_on_sheet_null()
 
         if not cxlsxio_read.xlsxioread_sheet_next_row(self._c_xlsxioreadersheet):
             return None
@@ -288,6 +300,18 @@ cdef class XlsxioReaderSheet:
                 return row_data
             row_data.append(value)
             n += 1
+
+    cpdef get_last_row_index(self):
+        self._raise_on_sheet_null()
+
+        cdef size_t row_index = cxlsxio_read.xlsxioread_sheet_last_row_index(self._c_xlsxioreadersheet)
+        return row_index
+
+    cpdef get_flags(self):
+        self._raise_on_sheet_null()
+
+        cdef unsigned int flags = cxlsxio_read.xlsxioread_sheet_flags(self._c_xlsxioreadersheet)
+        return flags
 
     def read_row(self, ignore_type: bool = False):
         return self._read_row(int(ignore_type))
