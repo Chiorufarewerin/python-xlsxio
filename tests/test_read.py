@@ -43,19 +43,16 @@ class TestReadXlsx:
         self.base_read(reader)
 
     def test_read_from_filename_not_existing(self):
-        with pytest.raises(FileNotFoundError) as ex:
+        with pytest.raises(FileNotFoundError, match='No such file: notfound.xlsx'):
             xlsxio.XlsxioReader('notfound.xlsx')
-        assert str(ex.value) == 'No such file: notfound.xlsx'
 
     def test_read_from_incorrect_bytes(self):
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError, match='Incorrect value of xlsx file data'):
             xlsxio.XlsxioReader(b'')
-        assert str(ex.value) == 'Incorrect value of xlsx file data'
 
     def test_read_incorrect_type(self):
-        with pytest.raises(TypeError) as ex:
+        with pytest.raises(TypeError, match='Expected string or bytes, received: int'):
             xlsxio.XlsxioReader(123)
-        assert str(ex.value) == 'Expected string or bytes, not "int"'
 
     def test_get_sheet_names(self):
         with self.get_reader() as reader:
@@ -64,39 +61,33 @@ class TestReadXlsx:
     def test_get_sheet_names_reader_closed(self):
         with self.get_reader() as reader:
             pass
-        with pytest.raises(RuntimeError) as ex:
+        with pytest.raises(RuntimeError, match='Reader is closed or not opened'):
             reader.get_sheet_names()
-        assert str(ex.value) == 'Reader is closed or not opened'
 
     def test_sheet_incorrect_flags_value(self):
         with self.get_reader() as reader:
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(ValueError, match='Incorrect flags value'):
                 reader.get_sheet(flags=16)
-        assert str(ex.value) == 'Incorrect flags value'
 
     def test_sheet_incorrect_default_type_value(self):
         with self.get_reader() as reader:
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(ValueError, match='Incorrect default_type value'):
                 reader.get_sheet(default_type=list)
-        assert str(ex.value) == 'Incorrect default_type value'
 
     def test_sheet_incorrect_sheetname_value(self):
         with self.get_reader() as reader:
-            with pytest.raises(TypeError) as ex:
+            with pytest.raises(TypeError, match='Value sheetname must be str or None'):
                 reader.get_sheet(123)
-        assert str(ex.value) == 'Value sheetname must be str or None'
 
     def test_sheet_sheetname_not_found(self):
         with self.get_reader() as reader:
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(ValueError, match='No such sheet: test'):
                 reader.get_sheet('test')
-        assert str(ex.value) == 'No such sheet: test'
 
     def test_sheet_icorrect_types(self):
         with self.get_reader() as reader:
-            with pytest.raises(ValueError) as ex:
+            with pytest.raises(ValueError, match='Incorrect types value'):
                 reader.get_sheet(types=[type])
-        assert str(ex.value) == 'Incorrect types value'
 
     def test_read_sheet_ignore_type(self):
         with self.get_reader() as reader:
@@ -132,9 +123,23 @@ class TestReadXlsx:
                 assert sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_EXTRA_CELLS
                 assert sheet.get_flags() & xlsxio.XlsxioReadFlag.SKIP_HIDDEN_ROWS
 
+    def test_get_flags_sheet_closed(self):
+        with self.get_reader() as reader:
+           sheet = reader.get_sheet()
+           sheet.close()
+           with pytest.raises(RuntimeError, match='Sheet is closed or not opened'):
+               sheet.get_flags()
+
     def test_get_last_row_index(self):
         with self.get_reader() as reader:
             with reader.get_sheet() as sheet:
                 assert sheet.get_last_row_index() == 0
                 sheet.read_row()
                 assert sheet.get_last_row_index() == 1
+
+    def test_test_get_last_row_index_sheet_closed(self):
+        with self.get_reader() as reader:
+           sheet = reader.get_sheet()
+           sheet.close()
+           with pytest.raises(RuntimeError, match='Sheet is closed or not opened'):
+               sheet.get_last_row_index()

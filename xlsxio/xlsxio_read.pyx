@@ -55,7 +55,7 @@ cdef class XlsxioReader:
         cdef const char* c_filename = filename_bytes
         self._c_xlsxioreader = cxlsxio_read.xlsxioread_open(c_filename)
         if self._c_xlsxioreader is NULL:
-            raise FileNotFoundError('No such file: %s' % (filename,))
+            raise FileNotFoundError(f'No such file: {filename}')
 
     cdef init_by_bytes(self, bytes data_bytes):
         cdef char* data = data_bytes
@@ -73,7 +73,7 @@ cdef class XlsxioReader:
         elif isinstance(filename, bytes):
             self.init_by_bytes(filename)
         else:
-            raise TypeError(f'Expected string or bytes, not "{type(filename).__name__}"')
+            raise TypeError(f'Expected string or bytes, received: {type(filename).__name__}')
 
     cpdef tuple get_sheet_names(self):
         if self._cached_sheet_names is None:
@@ -122,7 +122,7 @@ cdef class XlsxioReaderSheetList:
 
     cpdef tuple get_names(self):
         if self._c_xlsxioreadersheetlist is NULL:
-            raise RuntimeError('Sheet list is not opened')
+            raise RuntimeError('Sheet list is closed or not opened')
 
         cdef list names = []
         cdef object name
@@ -190,14 +190,14 @@ cdef class XlsxioReaderSheet:
 
         if sheetname is not None:
             if sheetname not in xlsxioreader.get_sheet_names():
-                raise ValueError('No such sheet: %s' % (sheetname,))
+                raise ValueError(f'No such sheet: {sheetname}')
             temp_filename = sheetname.encode(xlsxioreader.encoding)
             self._c_sheetname = temp_filename
 
         self._c_xlsxioreadersheet = cxlsxio_read.xlsxioread_sheet_open(xlsxioreader._c_xlsxioreader,
                                                                        self._c_sheetname, self._c_flags)
         if self._c_xlsxioreadersheet is NULL:
-            raise RuntimeError('Sheet cannot be opened.')
+            raise RuntimeError('Sheet cannot be opened')
 
         if types is not None:
             if not all(_type in XLSXIOREAD_CELL_TYPES for _type in types):
@@ -211,7 +211,7 @@ cdef class XlsxioReaderSheet:
 
     cdef _raise_on_sheet_null(self):
         if self._c_xlsxioreadersheet is NULL:
-            raise RuntimeError('Sheet is not open')
+            raise RuntimeError('Sheet is closed or not opened')
 
     cdef char* read_cell_char(self):
         cdef char* value
